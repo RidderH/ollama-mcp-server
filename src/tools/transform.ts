@@ -7,6 +7,7 @@ import { z } from 'zod';
 import {
   DEFAULT_MODEL,
   DEFAULT_NUM_CTX,
+  HEARTBEAT_MS,
   MAX_TRANSFORM_FILES,
   MIN_OUTPUT_RATIO,
   SHRINK_CHECK_MIN_BYTES
@@ -22,7 +23,7 @@ import {
 import { readTextFile, writeTextFile } from '../services/files.js';
 import { cleanFileOutput } from '../services/format.js';
 import { generate } from '../services/ollama.js';
-import { reportProgress, respond, respondError, type ToolExtra } from '../services/respond.js';
+import { progressCounter, respond, respondError, type ToolExtra } from '../services/respond.js';
 import { ResponseFormat, type TransformOutcome } from '../types.js';
 
 const TRANSFORM_SYSTEM_PROMPT = [
@@ -213,9 +214,11 @@ Error Handling:
 
         const results: TransformOutcome[] = [];
         const total = params.paths.length;
+        const progress = progressCounter(extra, HEARTBEAT_MS);
 
         for (const [index, path] of params.paths.entries()) {
-          await reportProgress(extra, index, total, `Rewriting ${path} (${index + 1}/${total})`);
+          await progress.step(`Rewriting ${path} (${index + 1}/${total})`);
+          const stopHeartbeat = progress.heartbeat(`Rewriting ${path} with ${settings.model}`);
           try {
             results.push(await transformOne(path, params.instructions, settings));
           } catch (error) {
@@ -225,9 +228,11 @@ Error Handling:
               status: 'failed',
               error: error instanceof Error ? error.message : String(error)
             });
+          } finally {
+            stopHeartbeat();
           }
         }
-        await reportProgress(extra, total, total, 'Done');
+        await progress.step('Done');
 
         const counts = {
           changed: results.filter((r) => r.status === 'changed' || r.status === 'skipped').length,

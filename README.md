@@ -92,6 +92,7 @@ All optional, all environment variables.
 | `OLLAMA_MCP_MODEL` | `qwen3.8:27b-mlx` | Model used when a call doesn't name one |
 | `OLLAMA_MCP_NUM_CTX` | `32768` | Context window sent as `num_ctx` |
 | `OLLAMA_MCP_TIMEOUT_MS` | `600000` | Per-request timeout |
+| `OLLAMA_MCP_HEARTBEAT_MS` | `10000` | Progress heartbeat interval while a generation runs, keeping the client's idle timeout fed |
 | `OLLAMA_MCP_ROOT` | process cwd | Directory all file paths are confined to |
 | `OLLAMA_MCP_MAX_FILE_BYTES` | `400000` | Largest file the server will read |
 

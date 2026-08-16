@@ -49,7 +49,7 @@ export function respondError(error: unknown): CallToolResult {
 export async function reportProgress(
   extra: ToolExtra,
   progress: number,
-  total: number,
+  total: number | undefined,
   message: string
 ): Promise<void> {
   const progressToken = extra._meta?.progressToken;
@@ -57,9 +57,51 @@ export async function reportProgress(
   try {
     await extra.sendNotification({
       method: 'notifications/progress',
-      params: { progressToken, progress, total, message }
+      params: { progressToken, progress, ...(total !== undefined ? { total } : {}), message }
     });
   } catch {
     /* progress is best-effort */
   }
+}
+
+export interface ProgressCounter {
+  /** Emit one labelled progress step. */
+  step: (message: string) => Promise<void>;
+  /**
+   * Emit "<label> — still running (Ns elapsed)" every `intervalMs` until the
+   * returned stop function is called. Call stop in a finally block.
+   */
+  heartbeat: (label: string, intervalMs?: number) => () => void;
+}
+
+/**
+ * A per-call progress sequence whose values only ever increase, so discrete
+ * steps and heartbeat ticks can interleave without the client seeing progress
+ * run backwards.
+ *
+ * The heartbeat exists to keep the connection audibly alive during a long
+ * generation: clients enforce an idle timeout, and a call that goes silent for
+ * the whole generation gets aborted, leaving the calling agent to continue
+ * without the result.
+ */
+export function progressCounter(extra: ToolExtra, heartbeatMs: number): ProgressCounter {
+  let sequence = 0;
+
+  const step = (message: string): Promise<void> => {
+    sequence += 1;
+    return reportProgress(extra, sequence, undefined, message);
+  };
+
+  const heartbeat = (label: string, intervalMs = heartbeatMs): (() => void) => {
+    if (extra._meta?.progressToken === undefined) return () => {};
+    const startedAt = Date.now();
+    const timer = setInterval(() => {
+      const elapsed = Math.round((Date.now() - startedAt) / 1000);
+      void step(`${label} — still running (${elapsed}s elapsed)`);
+    }, intervalMs);
+    timer.unref();
+    return () => clearInterval(timer);
+  };
+
+  return { step, heartbeat };
 }

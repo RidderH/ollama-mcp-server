@@ -3,7 +3,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { DEFAULT_MODEL, DEFAULT_NUM_CTX } from '../constants.js';
+import { DEFAULT_MODEL, DEFAULT_NUM_CTX, HEARTBEAT_MS } from '../constants.js';
 import {
   disableThinkingField,
   instructionsField,
@@ -15,7 +15,7 @@ import {
 import { readTextFile } from '../services/files.js';
 import { stripThinkBlocks } from '../services/format.js';
 import { generate } from '../services/ollama.js';
-import { reportProgress, respond, respondError, type ToolExtra } from '../services/respond.js';
+import { progressCounter, respond, respondError, type ToolExtra } from '../services/respond.js';
 import { ResponseFormat } from '../types.js';
 
 const DELEGATE_SYSTEM_PROMPT = [
@@ -128,19 +128,26 @@ Error Handling:
     async (params, extra: ToolExtra) => {
       try {
         const model = params.model ?? DEFAULT_MODEL;
-        await reportProgress(extra, 0, 2, `Reading ${params.context_files.length} context file(s)`);
+        const progress = progressCounter(extra, HEARTBEAT_MS);
+        await progress.step(`Reading ${params.context_files.length} context file(s)`);
 
         const prompt = await buildPrompt(params.instructions, params.context_files, params.context_text);
 
-        await reportProgress(extra, 1, 2, `Running ${model} locally`);
-        const result = await generate({
-          model,
-          system: DELEGATE_SYSTEM_PROMPT,
-          prompt,
-          ...(params.num_ctx !== undefined ? { numCtx: params.num_ctx } : {}),
-          ...(params.temperature !== undefined ? { temperature: params.temperature } : {}),
-          disableThinking: params.disable_thinking
-        });
+        await progress.step(`Running ${model} locally`);
+        const stopHeartbeat = progress.heartbeat(`Generating with ${model}`);
+        let result;
+        try {
+          result = await generate({
+            model,
+            system: DELEGATE_SYSTEM_PROMPT,
+            prompt,
+            ...(params.num_ctx !== undefined ? { numCtx: params.num_ctx } : {}),
+            ...(params.temperature !== undefined ? { temperature: params.temperature } : {}),
+            disableThinking: params.disable_thinking
+          });
+        } finally {
+          stopHeartbeat();
+        }
 
         const text = stripThinkBlocks(result.text);
         const insufficient = /^INSUFFICIENT:/i.test(text.trim());
@@ -155,7 +162,7 @@ Error Handling:
           context_files_read: params.context_files.length
         };
 
-        await reportProgress(extra, 2, 2, 'Done');
+        await progress.step('Done');
 
         const header = insufficient
           ? [

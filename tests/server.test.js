@@ -20,6 +20,8 @@ const SERVER_ENTRY = fileURLToPath(new URL('../dist/index.js', import.meta.url))
 /** Next chat reply the stub will hand back; tests set this per case. */
 let nextChatContent = 'stub reply';
 let lastChatBody = null;
+/** Delay before the stub answers /api/chat, to simulate slow local generation. */
+let nextChatDelayMs = 0;
 
 function startStubOllama() {
   const server = createServer((req, res) => {
@@ -59,16 +61,15 @@ function startStubOllama() {
 
       if (req.url === '/api/chat') {
         lastChatBody = JSON.parse(body);
-        res.end(
-          JSON.stringify({
-            model: lastChatBody.model,
-            message: { role: 'assistant', content: nextChatContent },
-            done: true,
-            total_duration: 1_500_000_000,
-            prompt_eval_count: 120,
-            eval_count: 45
-          })
-        );
+        const reply = JSON.stringify({
+          model: lastChatBody.model,
+          message: { role: 'assistant', content: nextChatContent },
+          done: true,
+          total_duration: 1_500_000_000,
+          prompt_eval_count: 120,
+          eval_count: 45
+        });
+        setTimeout(() => res.end(reply), nextChatDelayMs);
         return;
       }
 
@@ -109,6 +110,54 @@ describe('ollama-mcp-server', () => {
   after(async () => {
     await client?.close();
     await new Promise((resolve) => stub.close(resolve));
+  });
+
+  it('ships delegation instructions to the client at initialize', () => {
+    const instructions = client.getInstructions();
+    assert.ok(instructions, 'server should declare instructions in its initialize result');
+    assert.match(instructions, /ollama_delegate_task/);
+  });
+
+  it('sends heartbeat progress while a slow generation is running', async () => {
+    const slow = new Client({ name: 'test-client-slow', version: '1.0.0' });
+    await slow.connect(
+      new StdioClientTransport({
+        command: process.execPath,
+        args: [SERVER_ENTRY],
+        env: {
+          PATH: process.env.PATH,
+          OLLAMA_HOST: `http://127.0.0.1:${stub.address().port}`,
+          OLLAMA_MCP_ROOT: workspace,
+          OLLAMA_MCP_MODEL: 'qwen3:8b',
+          OLLAMA_MCP_HEARTBEAT_MS: '200'
+        }
+      })
+    );
+
+    nextChatContent = 'slow but steady';
+    nextChatDelayMs = 1200;
+    const updates = [];
+    try {
+      const result = await slow.callTool(
+        { name: 'ollama_delegate_task', arguments: { instructions: 'Count to three, slowly.' } },
+        undefined,
+        { onprogress: (update) => updates.push(update) }
+      );
+      assert.equal(result.structuredContent.output, 'slow but steady');
+    } finally {
+      nextChatDelayMs = 0;
+      await slow.close();
+    }
+
+    const heartbeats = updates.filter((u) => /still running|elapsed/i.test(u.message ?? ''));
+    assert.ok(
+      heartbeats.length >= 2,
+      `expected at least 2 heartbeat notifications during a 1.2s generation, got ${heartbeats.length} ` +
+        `(all updates: ${JSON.stringify(updates)})`
+    );
+    const progressValues = updates.map((u) => u.progress);
+    const sorted = [...progressValues].sort((a, b) => a - b);
+    assert.deepEqual(progressValues, sorted, 'progress must be monotonically non-decreasing');
   });
 
   it('advertises all four tools with correct annotations', async () => {

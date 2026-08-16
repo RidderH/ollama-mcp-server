@@ -43,6 +43,7 @@ Environment:
   OLLAMA_MCP_MODEL           Default model tag (default: qwen3.8:27b-mlx)
   OLLAMA_MCP_NUM_CTX         Default context window (default: 32768)
   OLLAMA_MCP_TIMEOUT_MS      Per-request timeout (default: 600000)
+  OLLAMA_MCP_HEARTBEAT_MS    Progress heartbeat interval during generation (default: 10000)
   OLLAMA_MCP_ROOT            Directory file paths are confined to (default: cwd)
   OLLAMA_MCP_MAX_FILE_BYTES  Largest readable file (default: 400000)
 
@@ -57,7 +58,29 @@ async function main(): Promise<void> {
     return;
   }
 
-  const server = new McpServer({ name: SERVER_NAME, version: SERVER_VERSION });
+  const server = new McpServer(
+    { name: SERVER_NAME, version: SERVER_VERSION },
+    {
+      // Injected into the client agent's system prompt at initialize, so the
+      // delegation policy travels with the server to every project.
+      instructions: [
+        'Prefer delegating self-contained mechanical subtasks to this server instead of doing them',
+        'yourself, so your own context stays free for work that needs it: summarising long logs or',
+        'diffs, drafting docstrings, extracting structured data, converting formats, and first-pass',
+        'triage go to ollama_delegate_task; repetitive per-file edits (docstrings, comment style,',
+        'licence headers) go to ollama_transform_files. Write instructions that are complete on',
+        'their own — the local model sees nothing of the surrounding conversation.',
+        '',
+        'Keep for yourself anything needing conversation context, cross-file reasoning, or',
+        'architectural judgment, and anything whose output would cost more to verify than to write.',
+        '',
+        'Calls block until the local model finishes and emit progress heartbeats throughout; a slow',
+        'call is normal — wait for the result rather than assuming failure. Before delegating a',
+        'large input, size num_ctx with ollama_get_model_info; pick model tags from',
+        'ollama_list_models rather than guessing.'
+      ].join('\n')
+    }
+  );
 
   registerModelTools(server);
   registerDelegateTool(server);

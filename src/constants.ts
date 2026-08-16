@@ -35,6 +35,17 @@ export const DEFAULT_NUM_CTX = envInt('OLLAMA_MCP_NUM_CTX', 32768);
 /** Ceiling for a single Ollama request. Local generation on CPU is slow. */
 export const REQUEST_TIMEOUT_MS = envInt('OLLAMA_MCP_TIMEOUT_MS', 600_000);
 
+/**
+ * Interval between progress heartbeats while a generation is in flight.
+ *
+ * MCP clients abort a call that stays silent too long (Claude Code's idle
+ * timeout is 30 minutes on stdio, 5 on HTTP), and a single local generation
+ * can run for many minutes with no protocol traffic at all. The heartbeat is
+ * what keeps the client waiting on the result instead of timing out and
+ * moving on without it.
+ */
+export const HEARTBEAT_MS = envInt('OLLAMA_MCP_HEARTBEAT_MS', 10_000);
+
 /** Root directory that all file paths must resolve inside of. */
 export const WORKSPACE_ROOT = envString('OLLAMA_MCP_ROOT', process.cwd());
 
