@@ -40,7 +40,7 @@ Tools:
 
 Environment:
   OLLAMA_HOST                Ollama API base URL (default: http://127.0.0.1:11434)
-  OLLAMA_MCP_MODEL           Default model tag (default: qwen3:8b)
+  OLLAMA_MCP_MODEL           Default model tag (default: qwen3.8:27b-mlx)
   OLLAMA_MCP_NUM_CTX         Default context window (default: 32768)
   OLLAMA_MCP_TIMEOUT_MS      Per-request timeout (default: 600000)
   OLLAMA_MCP_ROOT            Directory file paths are confined to (default: cwd)

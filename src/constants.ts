@@ -21,7 +21,7 @@ function envInt(name: string, fallback: number): number {
 export const OLLAMA_HOST = envString('OLLAMA_HOST', 'http://127.0.0.1:11434').replace(/\/+$/, '');
 
 /** Model used when a tool call does not name one explicitly. */
-export const DEFAULT_MODEL = envString('OLLAMA_MCP_MODEL', 'qwen3:8b');
+export const DEFAULT_MODEL = envString('OLLAMA_MCP_MODEL', 'qwen3.8:27b-mlx');
 
 /**
  * Context window passed to Ollama as `num_ctx`.

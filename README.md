@@ -11,7 +11,7 @@ leaves the machine, and the orchestrator never stops being in charge.
 ## Requirements
 
 - Node.js 18 or newer
-- Ollama running locally with at least one model pulled (`ollama pull qwen3:8b`)
+- Ollama running locally with at least one model pulled (`ollama pull qwen3.8:27b-mlx`)
 
 ## Install
 
@@ -36,7 +36,7 @@ pinned to that project:
       "command": "node",
       "args": ["/absolute/path/to/ollama-mcp-server/dist/index.js"],
       "env": {
-        "OLLAMA_MCP_MODEL": "qwen3:8b",
+        "OLLAMA_MCP_MODEL": "qwen3.8:27b-mlx",
         "OLLAMA_MCP_NUM_CTX": "32768",
         "OLLAMA_MCP_ROOT": "/absolute/path/to/your/project"
       }
@@ -89,7 +89,7 @@ All optional, all environment variables.
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `OLLAMA_HOST` | `http://127.0.0.1:11434` | Ollama API base URL |
-| `OLLAMA_MCP_MODEL` | `qwen3:8b` | Model used when a call doesn't name one |
+| `OLLAMA_MCP_MODEL` | `qwen3.8:27b-mlx` | Model used when a call doesn't name one |
 | `OLLAMA_MCP_NUM_CTX` | `32768` | Context window sent as `num_ctx` |
 | `OLLAMA_MCP_TIMEOUT_MS` | `600000` | Per-request timeout |
 | `OLLAMA_MCP_ROOT` | process cwd | Directory all file paths are confined to |
