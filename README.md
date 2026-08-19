@@ -66,6 +66,17 @@ instructions have to stand on their own. If the model decides the task is unders
 `INSUFFICIENT: …` rather than guessing, and the tool surfaces that as `insufficient: true` so the
 orchestrator can rewrite the request instead of acting on a fabricated answer.
 
+**Images.** A context file whose bytes say PNG, JPEG, GIF or WebP travels in Ollama's `images` field,
+base64-encoded, and the prompt carries only an `<image path=… index=…/>` marker naming it. Sending a
+picture as prompt text does not work at all: a 126 KB PNG decoded as UTF-8 became 87.656 prompt tokens
+of mojibake and hit the runner's 5-minute wall, where the same picture costs about 1.200 image tokens.
+Before the call the server checks the model advertises the `vision` capability, because Ollama accepts
+the field regardless and a blind model answers confidently from the surrounding text alone.
+
+Any other non-text file is refused with a message naming the conversion (`pdftotext -layout` for a
+PDF's text layer, `pdftoppm -r 150 -png` for a page as an image) rather than decoded into bytes the
+model cannot read.
+
 ### `ollama_transform_files`
 
 Applies one instruction to each of up to 50 files, one request per file, writing results in place and
@@ -109,6 +120,8 @@ configured value exceeds what the model actually supports.
 - Relative paths resolve against the root rather than the process cwd, so the two can't drift.
 - The server only talks to the configured Ollama host, and logs to stderr only (stdout carries protocol
   traffic).
+- File type is decided by magic bytes, not by extension, so a `.txt` that is really a JPEG is still
+  handled as an image and a mislabelled binary is still refused.
 
 ## Development
 
@@ -119,8 +132,8 @@ npm run dev       # watch mode
 ```
 
 The test suite drives a real MCP client over stdio against a stub Ollama, so it covers the server's own
-behaviour — schema shape, fence stripping, the truncation guard, path sandboxing, batch error isolation
-— without needing a model installed or producing flaky results.
+behaviour — schema shape, fence stripping, the truncation guard, path sandboxing, batch error isolation,
+image encoding and the vision pre-flight — without needing a model installed or producing flaky results.
 
 ## Notes on long-running calls
 

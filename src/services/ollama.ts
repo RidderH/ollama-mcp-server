@@ -97,6 +97,7 @@ export interface GenerateParams {
   model: string;
   system: string;
   prompt: string;
+  images?: string[];
   numCtx?: number;
   temperature?: number;
   disableThinking?: boolean;
@@ -115,7 +116,11 @@ export async function generate(params: GenerateParams): Promise<GenerationResult
     stream: false,
     messages: [
       { role: 'system', content: params.system },
-      { role: 'user', content: params.prompt }
+      {
+        role: 'user',
+        content: params.prompt,
+        ...(params.images !== undefined && params.images.length > 0 ? { images: params.images } : {})
+      }
     ],
     options: {
       num_ctx: params.numCtx ?? DEFAULT_NUM_CTX,
@@ -155,6 +160,26 @@ export async function generate(params: GenerateParams): Promise<GenerationResult
     outputTokens: response.eval_count,
     durationMs: response.total_duration !== undefined ? Math.round(response.total_duration / 1e6) : undefined
   };
+}
+
+/**
+ * Refuse to send images to a model that cannot see them.
+ *
+ * Ollama accepts the `images` field whatever the model is; one without vision
+ * simply ignores it and answers from the prompt text alone, which reads as a
+ * confident answer about an image it never saw. A model that advertises no
+ * capabilities at all is left alone — absence of the field is not a denial.
+ */
+export async function assertVisionCapable(model: string, imageCount: number): Promise<void> {
+  const info = await showModel(model);
+  const capabilities = info.capabilities;
+  if (capabilities === undefined || capabilities.includes('vision')) return;
+
+  throw new ActionableError(
+    `Model '${model}' has no vision capability, so the ${imageCount} image file(s) passed would be ignored ` +
+      `and answered from the surrounding text alone. Run ollama_list_models and pick a model whose ` +
+      `capabilities include 'vision', or pass the content as text instead.`
+  );
 }
 
 /** Read the advertised context length out of an /api/show payload, if present. */

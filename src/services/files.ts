@@ -4,7 +4,7 @@ import { readFile, stat, writeFile } from 'node:fs/promises';
 import { isAbsolute, relative, resolve } from 'node:path';
 
 import { MAX_FILE_BYTES, WORKSPACE_ROOT } from '../constants.js';
-import { ActionableError } from '../types.js';
+import { ActionableError, type ContextFile } from '../types.js';
 
 const ROOT = resolve(WORKSPACE_ROOT);
 
@@ -26,8 +26,8 @@ export function resolveWithinRoot(candidate: string): string {
   return absolute;
 }
 
-/** Read a UTF-8 file, refusing anything large enough to overflow the window. */
-export async function readTextFile(candidate: string): Promise<string> {
+/** Read a file's bytes, mapping filesystem failures onto actionable messages. */
+async function readWithinRoot(candidate: string): Promise<Buffer> {
   const path = resolveWithinRoot(candidate);
 
   let size: number;
@@ -52,7 +52,66 @@ export async function readTextFile(candidate: string): Promise<string> {
     );
   }
 
-  return readFile(path, 'utf8');
+  return readFile(path);
+}
+
+/** Leading bytes that identify the image formats Ollama's vision models accept. */
+const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+/** The image format of these bytes, or undefined if they are not an image. */
+function imageTypeOf(buffer: Buffer): string | undefined {
+  if (buffer.subarray(0, 8).equals(PNG_MAGIC)) return 'image/png';
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return 'image/jpeg';
+  const head = buffer.subarray(0, 6).toString('latin1');
+  if (head === 'GIF87a' || head === 'GIF89a') return 'image/gif';
+  if (head.startsWith('RIFF') && buffer.subarray(8, 12).toString('latin1') === 'WEBP') return 'image/webp';
+  return undefined;
+}
+
+/**
+ * Whether these bytes would turn to nonsense when decoded as UTF-8.
+ *
+ * Reading a PDF or a spreadsheet as text does not fail — it yields a wall of
+ * replacement characters that reaches the model as a huge, meaningless prompt.
+ * A null byte or a scattering of replacement characters is enough to tell.
+ */
+function looksBinary(buffer: Buffer): boolean {
+  const window = buffer.subarray(0, 8000);
+  if (window.includes(0)) return true;
+  const text = window.toString('utf8');
+  const replacements = text.match(/�/g)?.length ?? 0;
+  return replacements > Math.max(1, text.length / 1000);
+}
+
+function notTextError(candidate: string): ActionableError {
+  return new ActionableError(
+    `File '${candidate}' is not text and not an image format the model can read (PNG, JPEG, GIF or WebP). ` +
+      `Decoding it as UTF-8 would send unreadable bytes, not content. Convert it first: a PDF's text layer ` +
+      `comes out with 'pdftotext -layout', and a page becomes a readable image with 'pdftoppm -r 150 -png'.`
+  );
+}
+
+/** Read a UTF-8 file, refusing anything that is not actually text. */
+export async function readTextFile(candidate: string): Promise<string> {
+  const buffer = await readWithinRoot(candidate);
+  if (looksBinary(buffer)) throw notTextError(candidate);
+  return buffer.toString('utf8');
+}
+
+/**
+ * Read one context file as whatever it actually is: an image travels to the
+ * model base64-encoded in the `images` field, text goes into the prompt.
+ */
+export async function readContextFile(candidate: string): Promise<ContextFile> {
+  const buffer = await readWithinRoot(candidate);
+
+  const mediaType = imageTypeOf(buffer);
+  if (mediaType !== undefined) {
+    return { kind: 'image', path: candidate, mediaType, base64: buffer.toString('base64') };
+  }
+
+  if (looksBinary(buffer)) throw notTextError(candidate);
+  return { kind: 'text', path: candidate, text: buffer.toString('utf8') };
 }
 
 export async function writeTextFile(candidate: string, content: string): Promise<void> {

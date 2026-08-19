@@ -38,7 +38,17 @@ export interface OllamaChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
   thinking?: string;
+  /** Base64-encoded images, the only way a picture reaches a vision model. */
+  images?: string[];
 }
+
+/**
+ * One file handed to the model. Images cannot travel in the prompt text — a
+ * PNG decoded as UTF-8 is mojibake — so they are carried separately.
+ */
+export type ContextFile =
+  | { kind: 'text'; path: string; text: string }
+  | { kind: 'image'; path: string; mediaType: string; base64: string };
 
 export interface OllamaChatResponse {
   model?: string;

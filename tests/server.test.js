@@ -22,6 +22,12 @@ let nextChatContent = 'stub reply';
 let lastChatBody = null;
 /** Delay before the stub answers /api/chat, to simulate slow local generation. */
 let nextChatDelayMs = 0;
+/** Capabilities the stub reports for /api/show; tests flip vision on and off. */
+let showCapabilities = ['completion', 'tools', 'thinking'];
+
+/** A real 1x1 transparent PNG, so the magic-byte sniff is exercised for real. */
+const PNG_1X1 =
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
 function startStubOllama() {
   const server = createServer((req, res) => {
@@ -53,7 +59,7 @@ function startStubOllama() {
           JSON.stringify({
             details: { family: 'qwen3', parameter_size: '8.2B', quantization_level: 'Q4_K_M' },
             model_info: { 'qwen3.context_length': 40960 },
-            capabilities: ['completion', 'tools', 'thinking']
+            capabilities: showCapabilities
           })
         );
         return;
@@ -302,6 +308,52 @@ describe('ollama-mcp-server', () => {
     assert.equal(result.structuredContent.changed, 1);
     assert.match(result.structuredContent.results[0].error, /File not found/);
     assert.equal(result.structuredContent.results[1].status, 'changed');
+  });
+
+  it('sends an image context file as base64 images, never as prompt text', async () => {
+    showCapabilities = ['completion', 'vision', 'tools', 'thinking'];
+    await writeFile(join(workspace, 'shot.png'), Buffer.from(PNG_1X1, 'base64'));
+    nextChatContent = 'A one-pixel transparent square.';
+
+    try {
+      const result = await client.callTool({
+        name: 'ollama_delegate_task',
+        arguments: { instructions: 'Describe this image in one sentence.', context_files: ['shot.png'] }
+      });
+
+      const user = lastChatBody.messages.find((message) => message.role === 'user');
+      assert.deepEqual(user.images, [PNG_1X1], 'the image belongs in the images field');
+      assert.ok(!user.content.includes(PNG_1X1), 'image bytes must not reach the text prompt');
+      assert.match(user.content, /shot\.png/, 'the prompt still names the file');
+      assert.equal(result.structuredContent.images_sent, 1);
+    } finally {
+      showCapabilities = ['completion', 'tools', 'thinking'];
+    }
+  });
+
+  it('refuses an image when the model cannot see', async () => {
+    showCapabilities = ['completion', 'tools', 'thinking'];
+    await writeFile(join(workspace, 'blind.png'), Buffer.from(PNG_1X1, 'base64'));
+
+    const result = await client.callTool({
+      name: 'ollama_delegate_task',
+      arguments: { instructions: 'Read the table in this image.', context_files: ['blind.png'] }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(result.content[0].text, /vision/i);
+  });
+
+  it('refuses a binary context file rather than passing mojibake off as text', async () => {
+    await writeFile(join(workspace, 'scan.pdf'), Buffer.from('%PDF-1.4\n\u0000\u0001\u0002stream', 'binary'));
+
+    const result = await client.callTool({
+      name: 'ollama_delegate_task',
+      arguments: { instructions: 'Summarise this document.', context_files: ['scan.pdf'] }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(result.content[0].text, /not text/i);
   });
 
   it('surfaces an unreachable Ollama with an actionable message', async () => {
