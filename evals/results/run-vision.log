@@ -1,0 +1,25 @@
+model: qwen3.8:27b-mlx
+probes: 4 x 3 repeats = 12 calls
+raw: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/raw-2026-08-20T16-02-39.jsonl
+
+warm-up: loading the model… 6804 ms
+V1-clean-150dpi [1/3] … pass (13s, 1268p/436o)
+V1-clean-150dpi [2/3] … pass (8s, 1268p/436o)
+V1-clean-150dpi [3/3] … pass (8s, 1268p/436o)
+V2-low-60dpi [1/3] … pass (11s, 616p/415o)
+V2-low-60dpi [2/3] … pass (9s, 616p/441o)
+V2-low-60dpi [3/3] … pass (8s, 616p/441o)
+V3-rotated-150dpi [1/3] … pass (15s, 1268p/436o)
+V3-rotated-150dpi [2/3] … pass (8s, 1268p/425o)
+V3-rotated-150dpi [3/3] … pass (8s, 1268p/436o)
+V4-rotated-60dpi [1/3] … FAIL (11s, 616p/441o)
+V4-rotated-60dpi [2/3] … FAIL (8s, 616p/415o)
+V4-rotated-60dpi [3/3] … FAIL (8s, 616p/441o)
+
+--- summary (worst case governs) ---
+V1-clean-150dpi: 3/3 passed, 13s cold (then 8/8s cached)
+V2-low-60dpi: 3/3 passed, 11s cold (then 9/8s cached)
+V3-rotated-150dpi: 3/3 passed, 15s cold (then 8/8s cached)
+V4-rotated-60dpi: 0/3 passed, 11s cold (then 8/8s cached)
+
+summary: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/summary-2026-08-20T16-02-39.json

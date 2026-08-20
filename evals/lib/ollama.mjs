@@ -30,6 +30,7 @@ export async function generate({
   temperature = 0.2,
   disableThinking = false,
   format,
+  images,
   timeoutMs = 900_000
 }) {
   const body = {
@@ -37,7 +38,14 @@ export async function generate({
     stream: false,
     messages: [
       { role: 'system', content: system },
-      { role: 'user', content: prompt }
+      {
+        role: 'user',
+        content: prompt,
+        // Base64 images ride in Ollama's own `images` field and cost image
+        // tokens rather than text tokens, exactly as `generate()` in
+        // `src/services/ollama.ts` sends them.
+        ...(images !== undefined && images.length > 0 ? { images } : {})
+      }
     ],
     options: { num_ctx: numCtx, temperature }
   };

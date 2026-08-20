@@ -659,3 +659,70 @@ So the constraint on a long Dutch write-up is not fidelity and not the wall cloc
 2.602 tokens sits well inside the 300 s ceiling. It is that asking for more prose past roughly
 a thousand tokens buys padding. **Ask for the length the answer needs, not the length that
 looks thorough.**
+
+---
+
+# Run 8 — 2026-08-20, gap #8: vision
+
+The rule file's vision paragraph rested on n=1 — one clean crop, ten lines exact. These probes
+hold the invoice fixed and vary two defects: resolution and rotation.
+
+Fixtures are built by `evals/fixtures/vision/make-fixtures.mjs`, which writes a PDF by hand
+using base-14 Helvetica and rasterises it with `pdftoppm`. Nothing depends on a browser, an
+installed font, or a screenshot of a window the OS sizes — and **resolution becomes an exact
+dial** rather than an image scaled down after the fact, which is the axis being measured.
+
+**One row is deliberately not arithmetically consistent.** D-012 is printed at `85,00` against
+`1 x 95,00`, a discount no multiplication predicts. Without it every figure on the page is
+derivable from two others, and a model that never looked at the regeltotaal column would score
+28 of 30 cells. That row, and the printed total, are the only two cells that prove reading.
+
+## 33. Each defect alone is survivable; together they are not
+
+30 cells per run — six rows of four figures plus the code, plus the total. n=3.
+
+| probe | image | prompt tokens | result |
+|---|---|---|---|
+| V1 clean, 150 dpi | 1240×646 | 1.268 | **3/3, every cell exact** |
+| V2 low, 60 dpi | 496×259 | 616 | **3/3, every cell exact** |
+| V3 rotated 3°, 150 dpi | 1240×646 | 1.268 | **3/3, every cell exact** |
+| V4 rotated 3°, 60 dpi | 496×259 | 616 | **0/3** |
+
+V2 is the surprising one: at 60 dpi the body text is about 4 pixels tall and it still read the
+discount row correctly, including the 85,00 that contradicts the arithmetic, and the total to
+the cent. Resolution alone is not the constraint. Nor is rotation alone. **The two compound.**
+
+## 34. The V4 failure is one euro, in the one figure a reader would reuse
+
+All three V4 runs returned `totaalExclBtw: 3706.2`. The invoice prints **3.705,20**. One euro,
+0,03 %, in the total — and identically in all three runs, so repeating the call does not
+reveal it. Two of the three also read D-012's stukprijs as `85`, which is that row's
+regeltotaal: the discount row collapsed into a single column.
+
+Everything else was right. **29 of 30 cells correct, and the wrong one is the total.** There is
+no sanity check at this scale that catches a one-euro discrepancy, no schema that rejects it,
+and no variance across repeats to expose it. This is the fabrication finding (12–14, 21) in a
+new place: the model is at its most confident exactly where the page contradicts what a
+sensible invoice would say.
+
+**Decision: a rotated low-resolution scan must not be delegated.** Straighten it or re-scan it
+first — the cost of doing so is nothing against a total that is quietly wrong. Where a scan
+cannot be improved, the total has to be recomputed from the rows rather than read.
+
+## 35. Vision answers fence about a third of the time, where text answers never did
+
+**4 of 12 vision runs wrapped the JSON in a code fence** (parse level `stripped`), against
+**0 of 30** in gap #5 — same model, same "geen code fences" in the prompt, same schema style.
+
+So finding 22's "a plain `JSON.parse` works straight off" holds for text tasks and **not** for
+image tasks. Since `ollama_delegate_task` strips think blocks but not fences, a caller parsing
+the answer to a vision task needs the fence stripped roughly one time in three. The rule file
+has been amended: strip fences before parsing, always.
+
+## 36. Handwriting remains unmeasured, deliberately
+
+There is no faithful fixture for it here. A cursive font renders evenly spaced glyphs on a
+true baseline with uniform stroke weight, so a model passing it would say nothing about a real
+hand — and the result would read like coverage. It is left open rather than answered by a
+proxy that flatters the model. Measuring it needs photographs of actual handwriting with
+hand-checked ground truth, which is fixture work rather than harness work.

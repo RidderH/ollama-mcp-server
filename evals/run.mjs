@@ -22,6 +22,7 @@ import { HAYSTACK_PROBES } from './probes/haystack.mjs';
 import { STRUCTURED_PROBES } from './probes/structured.mjs';
 import { CLASSIFY_PROBES } from './probes/classify.mjs';
 import { DUTCH_PROBES } from './probes/dutch.mjs';
+import { VISION_PROBES } from './probes/vision.mjs';
 
 const ALL_PROBES = [
   ...TRANSFORM_PROBES,
@@ -30,7 +31,8 @@ const ALL_PROBES = [
   ...HAYSTACK_PROBES,
   ...STRUCTURED_PROBES,
   ...CLASSIFY_PROBES,
-  ...DUTCH_PROBES
+  ...DUTCH_PROBES,
+  ...VISION_PROBES
 ];
 
 function parseArgs(argv) {

@@ -1,0 +1,115 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T16-02-39",
+  "repeats": 3,
+  "probes": [
+    {
+      "probe": "V1-clean-150dpi",
+      "gap": "vision",
+      "question": "The baseline: a clean 150 dpi render, 1240x646. Does every cell come back as printed?",
+      "decision": "Establishes at n=3 what the rule file currently claims at n=1. If this is not solid, nothing below it can be, and the vision paragraph has to be rewritten rather than extended.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 7558,
+      "wallMsMax": 13138,
+      "coldWallMs": 13138,
+      "warmWallMs": [
+        7633,
+        7558
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        1268,
+        1268,
+        1268
+      ],
+      "outputTokens": [
+        436,
+        436,
+        436
+      ]
+    },
+    {
+      "probe": "V2-low-60dpi",
+      "gap": "vision",
+      "question": "The same page at 60 dpi, 496x259 — a small scan or a screenshot. Where does reading give out?",
+      "decision": "Sets the resolution floor for delegating a scanned document. If 60 dpi still reads exactly, almost any real scan is safe; if it degrades silently, every scan needs its figures checked.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 8207,
+      "wallMsMax": 11007,
+      "coldWallMs": 11007,
+      "warmWallMs": [
+        8575,
+        8207
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        616,
+        616,
+        616
+      ],
+      "outputTokens": [
+        415,
+        441,
+        441
+      ]
+    },
+    {
+      "probe": "V3-rotated-150dpi",
+      "gap": "vision",
+      "question": "Three degrees off true at full resolution — a page photographed on a desk. Do the columns stay associated?",
+      "decision": "Rotation is the commonest defect in a document someone sends you, and the one that breaks column association: the failure is a value read from the neighbouring column, which looks entirely plausible.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 7573,
+      "wallMsMax": 14769,
+      "coldWallMs": 14769,
+      "warmWallMs": [
+        7573,
+        7950
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        1268,
+        1268,
+        1268
+      ],
+      "outputTokens": [
+        436,
+        425,
+        436
+      ]
+    },
+    {
+      "probe": "V4-rotated-60dpi",
+      "gap": "vision",
+      "question": "Both defects at once — the realistic worst case of a phone photo forwarded by a client.",
+      "decision": "Decides whether a bad scan may be delegated at all, or must be re-scanned before it is worth asking. Failing here while V2 and V3 pass would mean the two defects compound rather than add.",
+      "n": 3,
+      "passes": 0,
+      "worstCase": "at least one failure",
+      "wallMsMin": 8018,
+      "wallMsMax": 10808,
+      "coldWallMs": 10808,
+      "warmWallMs": [
+        8018,
+        8433
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        616,
+        616,
+        616
+      ],
+      "outputTokens": [
+        441,
+        415,
+        441
+      ]
+    }
+  ]
+}

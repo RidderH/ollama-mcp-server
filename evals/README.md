@@ -76,6 +76,7 @@ temperature and disable_thinking), so repeats are the only control over variance
 | `C3-closed-with-doubt` | classification | whether a confidence field can stand in for an escape category |
 | `C4-escape-and-doubt` | classification | whether the confidence field still discriminates once nothing is forced |
 | `D1`/`D2`/`D3` | dutch fidelity | the answer length at which Dutch notation or language would give out |
+| `V1`–`V4` | vision | which scan defects a document may carry before it must be re-scanned |
 
 The `S` probes run twice each: **A** with the JSON Schema pasted into the prompt, which is what
 the tools can do today, and **B** with the same prompt plus Ollama's own `format` field, which
