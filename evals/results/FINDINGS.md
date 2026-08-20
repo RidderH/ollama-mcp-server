@@ -351,3 +351,70 @@ went to stderr while the shell reported **exit 0 and printed `0.00`**.
 
 Both tools have now produced a well-formed wrong number with a zero exit status, by different
 routes. Only comparison against a known answer caught both.
+
+---
+
+# Findings — run 2026-08-20T14:28:47 (prompt budget, gap #4)
+
+4 sizes × 3 repeats. Raw: `raw-2026-08-20T14-28-47.jsonl`.
+
+One dossier code planted in the middle of a corpus of branch descriptions that each carry a
+code of the same shape, so finding it means matching on the city, not on the shape of an
+answer. Sizes at the shipped defaults: num_ctx 32768, thinking on.
+
+| size | prompt tokens | cold wall | read rate | recall | wrong code |
+|---|---|---|---|---|---|
+| 5k | 4.933 | 24 s | 210 tok/s | 3/3 | 0 |
+| 15k | 14.906 | 82 s | 182 tok/s | 3/3 | 0 |
+| 25k | 24.961 | 181 s | 138 tok/s | 3/3 | 0 |
+| 35k | 35.078 | 223 s | 157 tok/s | 3/3 | 0 |
+
+## 17. Recall does not degrade up to 35k — the "~25.000 token" budget is not a recall limit
+
+**12/12, every size, needle in the middle, among 28 to 205 distractor codes.** Not one run
+returned a wrong code, and every answer was the bare code with no surrounding prose. The
+rule's 25k figure marks where a *call died*, which is a wall-clock limit, not a limit on what
+the model can still find.
+
+**Scope of that claim.** One fact, one position (the middle), exact-string retrieval. It does
+not cover multi-fact synthesis, reasoning across widely separated passages, or positions
+other than the middle — all of which can degrade where single-needle retrieval does not.
+
+## 18. num_ctx 32768 did not truncate a 35k prompt
+
+Ollama reported `prompt_eval_count` of **35.078** against a window of 32.768, and recall was
+perfect. This confirms the existing note in the rule file rather than overturning it:
+**num_ctx is not a guard.** It will not save you from an oversized prompt by trimming it, and
+it will not warn you either — the request simply runs, at full cost.
+
+## 19. Reading is ~3× cheaper per token than the rule assumed, and generation is what binds
+
+Measured 138–210 tok/s reading, degrading gently with size. The rule file says ~104 tok/s
+falling to ~58 past 30k; that is pessimistic by a factor of two to three.
+
+The contrast that matters is against generation. From gap #3's runs, output ran ~34 tok/s.
+So in wall-clock:
+
+- 35.000 prompt tokens + 157 output tokens = **223 s**
+- 433 prompt tokens + 9.061 output tokens = **269 s**
+
+**A token you ask the model to write costs roughly four to five times a token you ask it to
+read.** The 2026-08-19 timeout that produced the "25k" figure was a task emitting 8.048
+output tokens — it died of generation, and the prompt size was never the problem. Budget the
+*answer*, not the question.
+
+## 20. A methodological correction to this harness: repeats hit the prompt cache
+
+The three repeats of each probe returned in 24/1/2 s, 82/3/3 s, 181/6/6 s and 223/7/6 s.
+Only the first is a cold read. Confirmed directly: at 25k the identical prompt returned in
+**8,0 s** while one differing only in where the needle sits took **153,7 s** — a factor of 19
+from prompt caching alone, both answers correct.
+
+`summarise()` in `run.mjs` now reports `coldWallMs` apart from the cached repeats, because
+averaging them understates a fresh call by an order of magnitude. **Repeats remain valid for
+correctness** — generation is still sampled afresh — **and invalid for latency.**
+
+Where generation dominates the run, the effect is small and the earlier figures stand; where
+the prompt dominates it is the whole measurement. The one earlier number this touches is the
+transform ceiling, quoted as "123–190 s" for 297 lines: 190 s is the cold read and the honest
+one to plan against.

@@ -18,8 +18,9 @@ import { generate, DEFAULT_MODEL, MCP_CALL_CEILING_MS } from './lib/ollama.mjs';
 import { TRANSFORM_PROBES } from './probes/transform.mjs';
 import { ESCAPE_HATCH_PROBES } from './probes/escape-hatch.mjs';
 import { PLANNER_PROBES } from './probes/planner.mjs';
+import { HAYSTACK_PROBES } from './probes/haystack.mjs';
 
-const ALL_PROBES = [...TRANSFORM_PROBES, ...ESCAPE_HATCH_PROBES, ...PLANNER_PROBES];
+const ALL_PROBES = [...TRANSFORM_PROBES, ...ESCAPE_HATCH_PROBES, ...PLANNER_PROBES, ...HAYSTACK_PROBES];
 
 function parseArgs(argv) {
   const args = { repeats: 3, only: undefined };
@@ -72,6 +73,14 @@ function summarise(runs) {
       worstCase: passes === bucket.length ? 'all passed' : 'at least one failure',
       wallMsMin: Math.min(...wall),
       wallMsMax: Math.max(...wall),
+      // Repeats send identical bytes, which hit Ollama's prompt cache: at 25k
+      // tokens the same prompt returned in 8 s against 154 s for one differing
+      // only in where the needle sits. Only the first call in a group measures
+      // a cold read, so it is reported apart rather than averaged in, which
+      // would understate a fresh call by an order of magnitude. Repeats stay
+      // meaningful for correctness -- generation is still sampled afresh.
+      coldWallMs: bucket[0].wallMs,
+      warmWallMs: bucket.slice(1).map((run) => run.wallMs),
       exceededMcpCeiling: bucket.filter((run) => run.exceedsMcpCeiling).length,
       promptTokens: bucket.map((run) => run.promptTokens),
       outputTokens: bucket.map((run) => run.outputTokens)
@@ -166,7 +175,10 @@ async function main() {
   for (const probe of summary.probes) {
     console.error(
       `${probe.probe}: ${probe.passes}/${probe.n} passed, ` +
-        `${Math.round(probe.wallMsMin / 1000)}-${Math.round(probe.wallMsMax / 1000)}s` +
+        `${Math.round(probe.coldWallMs / 1000)}s cold` +
+        (probe.warmWallMs.length > 0
+          ? ` (then ${probe.warmWallMs.map((ms) => Math.round(ms / 1000)).join('/')}s cached)`
+          : '') +`` +
         (probe.exceededMcpCeiling > 0 ? `, ${probe.exceededMcpCeiling} over the MCP ceiling` : '')
     );
   }
