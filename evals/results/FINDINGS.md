@@ -675,11 +675,11 @@ dial** rather than an image scaled down after the fact, which is the axis being 
 **One row is deliberately not arithmetically consistent.** D-012 is printed at `85,00` against
 `1 x 95,00`, a discount no multiplication predicts. Without it every figure on the page is
 derivable from two others, and a model that never looked at the regeltotaal column would score
-28 of 30 cells. That row, and the printed total, are the only two cells that prove reading.
+23 of the 25 graded values. That row's line total and the printed invoice total are the only two values that prove reading.
 
 ## 33. Each defect alone is survivable; together they are not
 
-30 cells per run — six rows of four figures plus the code, plus the total. n=3.
+25 graded values per run — six rows of four figures, plus the total. The article code is the key rows are matched on, not a graded value. n=3.
 
 | probe | image | prompt tokens | result |
 |---|---|---|---|
@@ -699,7 +699,7 @@ All three V4 runs returned `totaalExclBtw: 3706.2`. The invoice prints **3.705,2
 reveal it. Two of the three also read D-012's stukprijs as `85`, which is that row's
 regeltotaal: the discount row collapsed into a single column.
 
-Everything else was right. **29 of 30 cells correct, and the wrong one is the total.** There is
+Everything else was right. **At best 24 of 25 correct with the wrong one being the total**, and 23 of 25 in the two runs that also collapsed the discount row's unit price. There is
 no sanity check at this scale that catches a one-euro discrepancy, no schema that rejects it,
 and no variance across repeats to expose it. This is the fabrication finding (12–14, 21) in a
 new place: the model is at its most confident exactly where the page contradicts what a
