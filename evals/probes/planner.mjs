@@ -189,6 +189,43 @@ export const PLANNER_PROBES = [
     ].join('\n')
   }),
   plannerProbe({
+    id: 'P7-jq-json-total-pitfall-named',
+    tool: 'jq',
+    source: SOURCES.json,
+    question: TOTAL_QUESTION,
+    contract: ONE_NUMBER_CONTRACT,
+    expected: TRUTH.totalInkoop,
+    // P2 plus a hint built to the same specification as P6's: name the
+    // environment, name the wrong assumption, say it does not exist here.
+    // It does not say what to write instead, so a pass means the model had
+    // the knowledge and only the assumption was in the way -- which is what
+    // decides whether "name the pitfall" is a general prompt rule or an awk
+    // coincidence.
+    instruction: [
+      'Schrijf één shell-commando, gebaseerd op jq, dat dit antwoord berekent.',
+      'Let op: dit draait op jq 1.8. In jq worden de argumenten van een functie gescheiden door een',
+      'puntkomma, niet door een komma. Een aanroep als gsub("a", "b") bestaat daar niet en geeft een fout.'
+    ].join('\n')
+  }),
+  plannerProbe({
+    id: 'P8-jq-pitfall-named-neutral-hint',
+    tool: 'jq',
+    source: SOURCES.json,
+    question: TOTAL_QUESTION,
+    contract: ONE_NUMBER_CONTRACT,
+    expected: TRUTH.totalInkoop,
+    // P7 rerun with the confound removed. P7's hint spelled the counter-example
+    // out as gsub("a", "b") -- a comma followed by a space -- and the runs that
+    // took the hint then wrote ", " as the search pattern where the unhinted
+    // runs had written ",". The wording is the prime suspect, so this version
+    // names the rule with placeholders and gives no literal string to copy.
+    instruction: [
+      'Schrijf één shell-commando, gebaseerd op jq, dat dit antwoord berekent.',
+      'Let op: dit draait op jq 1.8. In jq worden de argumenten van een functie gescheiden door een',
+      'puntkomma en niet door een komma; een komma tussen argumenten geeft een foutmelding.'
+    ].join('\n')
+  }),
+  plannerProbe({
     id: 'P5-awk-csv-top3',
     tool: 'awk',
     source: SOURCES.csv,

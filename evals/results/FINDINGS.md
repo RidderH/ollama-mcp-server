@@ -285,3 +285,69 @@ Whether "name the pitfall" generalises beyond awk is untested: it is one tool, n
    and it would have passed `0.00` straight through. Verification has to be able to fail:
    run the command against a small slice whose answer you already know, or have a second tool
    agree, before trusting it on the full data.
+
+---
+
+# Findings — runs 2026-08-20T14:02 (P7) and 14:14 (P8): does "name the pitfall" generalise?
+
+P6 turned awk from 1/3 into 3/3 with one sentence naming the dialect. That is one tool, so
+the same treatment was given to jq — twice, because the first attempt was confounded.
+
+| probe | hint | passed | how the failures failed |
+|---|---|---|---|
+| P2-jq | none | 0/3 | loud 3/3 (`gsub/1 is not defined`) |
+| P7-jq | pitfall named, spelled `gsub("a", "b")` | 0/3 | 1 loud, 1 exit 5, **1 silent `0.00`** |
+| P8-jq | pitfall named with placeholders | 0/3 | loud 3/3 |
+
+## 14. P7 was confounded by its own wording — recorded rather than quietly rerun
+
+P7's hint spelled the counter-example out as `gsub("a", "b")` — a comma followed by a space.
+The two runs that adopted the hint then wrote `", "` as the *search pattern* where the
+unhinted P2 runs had written `","`, so the decimal comma was never replaced. The change
+coincides exactly with the hint's introduction, which makes the wording the prime suspect
+and P7's result unusable for the question it was built to answer. P8 repeats it with
+placeholders and no literal string to copy.
+
+**A hint can teach the error it warns about.** Worth remembering the next time a prompt is
+"clarified" with an example.
+
+## 15. It does not generalise: 0/9 for jq against 3/3 for awk
+
+The `gsub` calls inside a single P8 command tell the whole story:
+
+| run | `gsub("^\s+|\s+$"; "")` | `gsub("\\."; "")` | the comma one |
+|---|---|---|---|
+| rep1 | `;` correct | `;` correct | `gsub(",", ".")` — comma |
+| rep2 | `;` correct | `;` correct | `gsub(",", ".")` — comma |
+| rep3 | `;` correct | `;` correct | `gsub(","; ".")` correct — then died on `printf/2 is not defined` |
+
+The model is not ignorant of jq's separator: it applies it correctly twice in the same
+expression and fails on the one call whose argument is itself a comma. The literal comma in
+the string bleeds into the separator position. The neutral hint fixed that in 1 of 3 — and
+that run promptly tripped over `printf`, which is not a jq builtin at all.
+
+**So the rule is about the shape of the failure, not the tool.** Naming the pitfall rescued
+awk because awk's failure was *one coherent wrong assumption* (wrong dialect) that the model
+could route around with knowledge it already had — told the extension was absent, it
+hand-rolled a parser. jq's failures are a *cluster of small independent gaps*: close one and
+the next is exposed. Nothing in the output tells you in advance which kind you have.
+
+**Routing consequence.** Do not try to hint a weak tool into working. One clarifying sentence
+is worth trying once; if it does not land, switch tools rather than write a third. sqlite3
+and python3 were 3/3 first time with no hints at all.
+
+## 16. Correction to finding 11: jq does not always fail loudly
+
+P7 rep2 ended its pipeline with `jq -r '…' boekingen.json | printf "%.2f\n"`. `printf` does
+not read stdin, and a pipeline exits with the status of its *last* command — so jq's error
+went to stderr while the shell reported **exit 0 and printed `0.00`**.
+
+| check | catches awk's `0.00`? | catches jq's `0.00`? |
+|---|---|---|
+| does the output look right | no | no |
+| exit code non-zero | no | **no** |
+| stderr non-empty | no | yes |
+| compare against a known answer | **yes** | **yes** |
+
+Both tools have now produced a well-formed wrong number with a zero exit status, by different
+routes. Only comparison against a known answer caught both.
