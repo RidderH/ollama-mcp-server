@@ -19,8 +19,15 @@ import { TRANSFORM_PROBES } from './probes/transform.mjs';
 import { ESCAPE_HATCH_PROBES } from './probes/escape-hatch.mjs';
 import { PLANNER_PROBES } from './probes/planner.mjs';
 import { HAYSTACK_PROBES } from './probes/haystack.mjs';
+import { STRUCTURED_PROBES } from './probes/structured.mjs';
 
-const ALL_PROBES = [...TRANSFORM_PROBES, ...ESCAPE_HATCH_PROBES, ...PLANNER_PROBES, ...HAYSTACK_PROBES];
+const ALL_PROBES = [
+  ...TRANSFORM_PROBES,
+  ...ESCAPE_HATCH_PROBES,
+  ...PLANNER_PROBES,
+  ...HAYSTACK_PROBES,
+  ...STRUCTURED_PROBES
+];
 
 function parseArgs(argv) {
   const args = { repeats: 3, only: undefined };
@@ -147,6 +154,7 @@ async function main() {
           detail: graded.detail,
           wallMs: result.wallMs,
           exceedsMcpCeiling: result.exceedsMcpCeiling,
+          thought: result.thought,
           promptTokens: result.promptTokens,
           outputTokens: result.outputTokens,
           rawOutput: result.text

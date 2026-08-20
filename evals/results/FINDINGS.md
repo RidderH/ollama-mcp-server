@@ -418,3 +418,108 @@ Where generation dominates the run, the effect is small and the earlier figures 
 the prompt dominates it is the whole measurement. The one earlier number this touches is the
 transform ceiling, quoted as "123–190 s" for 297 lines: 190 s is the cold read and the honest
 one to plan against.
+
+---
+
+# Run 5 — 2026-08-20, gap #5: structured output
+
+Question: can a delegated answer be piped into a program instead of read by hand? Graded on
+three axes kept apart, because a caller defends against each differently: **is it JSON**,
+**is it the right shape**, **are the values right**. 12 probes, 3 repeats, 36 calls.
+
+Fixture: `evals/fixtures/structured/debiteuren.txt`, a four-row Dutch debtor overview whose
+total (€ 4.901,45) and per-row answers were derived by hand before the model saw it.
+
+## 21. With the schema in the prompt, structured output is reliable — 24/24 on all three axes
+
+S1–S4, both variants, thinking off. Every run returned JSON, conforming, with correct values.
+
+| probe | what it demanded | result |
+|---|---|---|
+| S1-flat | three scalars, ISO date, summed total | 6/6 |
+| S2-nested | object → array of 4 objects → scalars, plus the computed total | 6/6 |
+| S3-enum | four-value vocabulary, one row the source calls "deels betaald" | 6/6 |
+| S4-nullable | a dashed betaaldatum and a column that does not exist | 6/6 |
+
+The total came back as `4901.45` every time, never as a Dutch-notation string. The enum row
+that has no matching value came back as `"overig"` 6/6 — it did not invent a category.
+
+**S4 is the one that matters against gap #2.** The kredietlimiet column does not exist in the
+document, and the model wrote `null` for all four rows rather than a plausible figure — the
+opposite of the 2026-08-19 fabrication. The difference is not the model's honesty but the
+shape of the answer it was asked for: a nullable field is a **place to put "I don't have
+this"**, and prose has no such place. Findings 12–14 showed a judgement in prose filling the
+hole 6/6; the same model given a slot for absence uses it 6/6.
+
+**Scope.** One document, short answers, four schemas. It does not cover long extractions,
+many rows, or a schema deep enough to strain the model's attention.
+
+## 22. The answers parse with a plain `JSON.parse` — no fences, and that contradicts the transform habit
+
+**0/30 fenced. 29/30 parsed raw**, i.e. `JSON.parse(result.text)` with no extractor in front
+of it. The one exception is finding 24 below, and it needed a brace scan.
+
+This is worth stating because the transform findings say the opposite about the same model:
+there it fences even when told not to. The difference is the task, not the instruction —
+`ollama_delegate_task` strips think blocks but **not** fences (`src/tools/delegate.ts` imports
+`stripThinkBlocks` alone), so a caller that hits a fenced answer gets a parse error and has to
+handle it. Cheap insurance, rarely needed.
+
+## 23. Ollama's `format` does not constrain this model at all — 6/6 prose under HTTP 200
+
+S7/S8 set `format` to the JSON Schema and say **nothing** about JSON in the prompt, so the
+schema is the only thing that could produce the shape. All six runs returned:
+
+```
+Peildatum: 2026-08-31
+Aantal facturen: 4
+Totaalbedrag: € 4.901,45
+```
+
+Right answers, prose, no JSON, HTTP 200, no warning anywhere in the response.
+
+**Mechanism.** Ollama converts `format` into llama-server's `json_schema` response format
+(`llm/llama_server.go`, `llamaServerChatResponseFormat`). The model under test runs on a
+different runner — `ollama runner --mlx-engine --model qwen3.8:27b-mlx`, per
+`~/.ollama/logs/server.log`. The constraint lives on the llama.cpp path and did not appear on
+this one.
+
+**Decision: do not add a `format` field to the MCP server expecting it to enforce anything.**
+It would be a no-op here that reads, in code, exactly like a guarantee. The JSON in findings
+21 and 22 comes from the prompt, and the prompt is what has to keep carrying it. This is the
+same shape as every other finding in this file: the signal that should say "not enforced" is
+absent.
+
+## 24. `format` plus thinking is worse than either alone — it perturbs the prompt and corrupted 1 run in 3
+
+S5 (format, thinking on) returned on its third repeat:
+
+```
+peildatum{"peildatum":"2026-08-31","aantalFacturen":4,"totaalBedrag":4901.45}
+```
+
+A stray token ahead of the JSON. `JSON.parse` dies on it; only the brace scan recovered it.
+The controls stayed clean: S6 (thinking on, no format) 3/3 raw, S1-B (format, thinking off)
+3/3 raw. Only the combination misbehaved.
+
+Something else is measurably different on that path — **`format` with thinking on inflates the
+prompt** by 253 tokens on the same bytes (S5 741p against S6 488p), and by 272 on the shorter
+S7/S8 pair (606p against 334p). With thinking off it adds nothing (S1-A and S1-B both 490p).
+So `format` is not simply dropped on this runner; it is turned into something the model sees,
+and that something neither produced JSON (finding 23) nor left the answer intact.
+
+n=3, one corrupted run. Enough to say "do not send `format` with thinking on", not enough to
+call it a rate.
+
+## 25. A second methodological correction: these repeats were not independent samples
+
+**8 of 10 probes returned byte-identical output on all three repeats.** At temperature 0.2
+with identical prompt bytes, short answers reproduce exactly, so n=3 measured what n=1 did.
+The two that varied are the two with `format` set.
+
+This does not touch the earlier gaps — the escape-hatch and planner probes generate hundreds
+to thousands of tokens, where sampling diverges early and the repeats are real. It does mean
+**a probe whose answer is a few dozen tokens needs something varied between repeats** (the
+document, the order of the rows, the temperature) before its 3/3 may be read as three
+observations. Finding 20 established that repeats are invalid for latency; this narrows them
+further, for short outputs, on correctness.

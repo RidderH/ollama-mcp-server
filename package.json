@@ -37,7 +37,7 @@
     "clean": "rm -rf dist",
     "test": "npm run build && node --test tests/*.test.js",
     "prepublishOnly": "npm run clean && npm run build",
-    "test:evals": "node --test evals/lib/*.test.mjs",
+    "test:evals": "node --test evals/lib/*.test.mjs evals/probes/*.test.mjs",
     "evals": "node evals/run.mjs"
   },
   "engines": {

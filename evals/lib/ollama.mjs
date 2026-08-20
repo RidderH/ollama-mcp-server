@@ -29,6 +29,7 @@ export async function generate({
   numCtx = 32768,
   temperature = 0.2,
   disableThinking = false,
+  format,
   timeoutMs = 900_000
 }) {
   const body = {
@@ -41,6 +42,11 @@ export async function generate({
     options: { num_ctx: numCtx, temperature }
   };
   if (disableThinking) body.think = false;
+  // Ollama's own structured-output field, which the MCP server does NOT send
+  // (`src/services/ollama.ts` builds model/messages/options/think and nothing
+  // else). It is here so a probe can measure what adding it would buy, which
+  // is a decision about the server rather than about a prompt.
+  if (format !== undefined) body.format = format;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -71,6 +77,9 @@ export async function generate({
       cleanedFile: cleanFileOutput(text),
       cleanedText: stripThinkBlocks(text),
       model: parsed.model ?? model,
+      // Present only when the model ran a thinking phase. Recorded because
+      // `format` and thinking interact, and the interaction is silent.
+      thought: parsed.message?.thinking !== undefined,
       promptTokens: parsed.prompt_eval_count,
       outputTokens: parsed.eval_count,
       wallMs,

@@ -61,6 +61,19 @@ temperature and disable_thinking), so repeats are the only control over variance
 | `T4-unknowable-rename` | transform_files | whether an instruction may reference anything outside the file |
 | `E1-margin-without-cogs` | escape hatch | whether a delegated calculation can be trusted at all |
 | `E2-purchases-without-opening-stock` | escape hatch | whether the observed sum-fabrication reproduces |
+| `S1-flat` | structured output | whether a delegated result can be piped into a program at all |
+| `S2-nested` | structured output | whether a caller must count the rows of an extracted table itself |
+| `S3-enum` | structured output | whether a classification can be consumed by a switch statement |
+| `S4-nullable` | structured output | whether a schema may contain a field the source cannot fill |
+| `S5`/`S6` | structured output | whether `format` would have to force `disable_thinking` with it |
+| `S7`/`S8` | structured output | whether `format` constrains anything at all, or only the prompt does |
+
+The `S` probes run twice each: **A** with the JSON Schema pasted into the prompt, which is what
+the tools can do today, and **B** with the same prompt plus Ollama's own `format` field, which
+`src/services/ollama.ts` does not send. B is not reachable through the tools as they ship; it is
+measured because "add `format` to the server" is a decision the result can settle. A and B send
+identical prompt bytes, so B lands on the prompt cache: the pair is valid for correctness and
+**invalid for latency**.
 
 The `E` probes run twice each: **A** without the Dutch escape-hatch sentence, **B** with it.
 The shipped `DELEGATE_SYSTEM_PROMPT` already carries an `INSUFFICIENT:` escape hatch of its

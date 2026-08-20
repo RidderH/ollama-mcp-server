@@ -1,0 +1,277 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T15-21-55",
+  "repeats": 3,
+  "probes": [
+    {
+      "probe": "S1-flat--A-prompt-only",
+      "gap": "structured_output",
+      "question": "The easiest possible case: three scalar fields, every one of them present in the source. Does it come back as parseable JSON of the right shape?",
+      "decision": "If the flat case is not reliably parseable, no delegated result may be piped into a program without an extractor and a validator in front of it, whatever the task.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 672,
+      "wallMsMax": 2644,
+      "coldWallMs": 2644,
+      "warmWallMs": [
+        687,
+        672
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        490,
+        490,
+        490
+      ],
+      "outputTokens": [
+        37,
+        37,
+        37
+      ]
+    },
+    {
+      "probe": "S1-flat--B-native-format",
+      "gap": "structured_output",
+      "question": "The easiest possible case: three scalar fields, every one of them present in the source. Does it come back as parseable JSON of the right shape?",
+      "decision": "If the flat case is not reliably parseable, no delegated result may be piped into a program without an extractor and a validator in front of it, whatever the task.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 670,
+      "wallMsMax": 684,
+      "coldWallMs": 684,
+      "warmWallMs": [
+        670,
+        676
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        490,
+        490,
+        490
+      ],
+      "outputTokens": [
+        37,
+        37,
+        37
+      ]
+    },
+    {
+      "probe": "S2-nested--A-prompt-only",
+      "gap": "structured_output",
+      "question": "Nesting: an object holding an array of objects, plus a total that has to be computed from it. Does the structure survive, and does every row?",
+      "decision": "A dropped or merged row inside a valid-looking array is the quiet failure — the JSON parses, the shape validates, and the caller never learns a factuur went missing. If it happens, an extraction over a table must have its row count checked by the caller, not by the model.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 4310,
+      "wallMsMax": 6753,
+      "coldWallMs": 6753,
+      "warmWallMs": [
+        4378,
+        4310
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        640,
+        640,
+        640
+      ],
+      "outputTokens": [
+        264,
+        264,
+        264
+      ]
+    },
+    {
+      "probe": "S2-nested--B-native-format",
+      "gap": "structured_output",
+      "question": "Nesting: an object holding an array of objects, plus a total that has to be computed from it. Does the structure survive, and does every row?",
+      "decision": "A dropped or merged row inside a valid-looking array is the quiet failure — the JSON parses, the shape validates, and the caller never learns a factuur went missing. If it happens, an extraction over a table must have its row count checked by the caller, not by the model.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 4269,
+      "wallMsMax": 4407,
+      "coldWallMs": 4407,
+      "warmWallMs": [
+        4269,
+        4349
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        640,
+        640,
+        640
+      ],
+      "outputTokens": [
+        264,
+        264,
+        264
+      ]
+    },
+    {
+      "probe": "S3-enum--A-prompt-only",
+      "gap": "structured_output",
+      "question": "A fixed vocabulary with one row the source describes in a word that is not in it. Does it stay in vocabulary, or invent a category?",
+      "decision": "This is gap #6 in miniature. If \"deels betaald\" comes back as its own category, a delegated classification cannot be consumed by a switch statement and every caller needs an allowlist check. If it comes back as \"overig\", classification against a fixed list is safe to delegate.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 1363,
+      "wallMsMax": 2759,
+      "coldWallMs": 2759,
+      "warmWallMs": [
+        1369,
+        1363
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        568,
+        568,
+        568
+      ],
+      "outputTokens": [
+        77,
+        77,
+        77
+      ]
+    },
+    {
+      "probe": "S3-enum--B-native-format",
+      "gap": "structured_output",
+      "question": "A fixed vocabulary with one row the source describes in a word that is not in it. Does it stay in vocabulary, or invent a category?",
+      "decision": "This is gap #6 in miniature. If \"deels betaald\" comes back as its own category, a delegated classification cannot be consumed by a switch statement and every caller needs an allowlist check. If it comes back as \"overig\", classification against a fixed list is safe to delegate.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 1387,
+      "wallMsMax": 2518,
+      "coldWallMs": 2435,
+      "warmWallMs": [
+        1387,
+        2518
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        568,
+        568,
+        568
+      ],
+      "outputTokens": [
+        141,
+        77,
+        141
+      ]
+    },
+    {
+      "probe": "S4-nullable--A-prompt-only",
+      "gap": "structured_output",
+      "question": "Two kinds of absent field: a betaaldatum the source marks with a dash, and a kredietlimiet the source has no column for at all. Does it emit null, invent a value, or abandon the JSON to explain itself?",
+      "decision": "This is gap #2 asked in JSON. An invented date in a nullable field is unfalsifiable downstream — the shape validates and the value is wrong. If it fabricates here, no schema with an optional field may be delegated; if it answers in prose instead, a caller must handle a non-JSON answer as a legitimate outcome rather than a transport error.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 3317,
+      "wallMsMax": 4733,
+      "coldWallMs": 4733,
+      "warmWallMs": [
+        3662,
+        3317
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        580,
+        580,
+        580
+      ],
+      "outputTokens": [
+        201,
+        201,
+        201
+      ]
+    },
+    {
+      "probe": "S4-nullable--B-native-format",
+      "gap": "structured_output",
+      "question": "Two kinds of absent field: a betaaldatum the source marks with a dash, and a kredietlimiet the source has no column for at all. Does it emit null, invent a value, or abandon the JSON to explain itself?",
+      "decision": "This is gap #2 asked in JSON. An invented date in a nullable field is unfalsifiable downstream — the shape validates and the value is wrong. If it fabricates here, no schema with an optional field may be delegated; if it answers in prose instead, a caller must handle a non-JSON answer as a legitimate outcome rather than a transport error.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 3326,
+      "wallMsMax": 3388,
+      "coldWallMs": 3357,
+      "warmWallMs": [
+        3388,
+        3326
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        580,
+        580,
+        580
+      ],
+      "outputTokens": [
+        201,
+        201,
+        201
+      ]
+    },
+    {
+      "probe": "S6-prompt-only-thinking-on",
+      "gap": "structured_output",
+      "question": "Prompt-only JSON in the shipped default configuration — does the thinking phase cost the JSON?",
+      "decision": "The control for S5. If prompt-only holds up with thinking on and the enforced variant does not, the fault is in `format`, not in thinking.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 5402,
+      "wallMsMax": 7113,
+      "coldWallMs": 5792,
+      "warmWallMs": [
+        5402,
+        7113
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        488,
+        488,
+        488
+      ],
+      "outputTokens": [
+        288,
+        288,
+        361
+      ]
+    },
+    {
+      "probe": "S5-native-format-thinking-on",
+      "gap": "structured_output",
+      "question": "Is Ollama's `format` honoured when the model thinks — the configuration the server would send by default?",
+      "decision": "Decides whether adding `format` to the server also requires forcing disable_thinking. A 200 with prose in it is the worst outcome: the enforcement a caller believes in is not there, and nothing in the response says so.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 5760,
+      "wallMsMax": 7178,
+      "coldWallMs": 7178,
+      "warmWallMs": [
+        6873,
+        5760
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        741,
+        739,
+        739
+      ],
+      "outputTokens": [
+        37,
+        37,
+        37
+      ]
+    }
+  ]
+}
