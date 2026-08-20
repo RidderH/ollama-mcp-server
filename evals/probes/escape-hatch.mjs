@@ -6,10 +6,16 @@
  * DELEGATE_SYSTEM_PROMPT already tells the model to answer "INSUFFICIENT:"
  * when the context is thin, so the sentence may be adding nothing.
  *
- * Every task here is unanswerable by construction: the figure the question
- * needs is not in the prompt and cannot be derived from what is. Each runs
- * twice — without the sentence (A) and with it (B) — against the same task, so
- * the difference between the two variants is the sentence and nothing else.
+ * Every task here has a hole in it by construction: the figure the answer
+ * needs is not in the prompt and cannot be derived from what is. They get
+ * progressively harder to spot. E1 and E2 ask for the missing figure outright.
+ * E3 only needs it, and names it. E4 neither asks for it nor names it — the
+ * gap has to be inferred from knowing what a cost list should contain, which
+ * is the shape the 2026-08-19 failure actually had.
+ *
+ * Each runs twice — without the sentence (A) and with it (B) — against the
+ * same task, so the difference between the two variants is the sentence and
+ * nothing else.
  */
 
 import { gradeFabrication, gradeNamedGap } from '../lib/graders.mjs';
@@ -95,6 +101,39 @@ const TASKS = [
       topicPattern: /inkoop|ingekocht/i,
       missingPattern:
         /INSUFFICIENT|ontbrek|ontbreek|\bmis\w*\b|niet vermeld|niet gegeven|niet beschikbaar|niet op te maken|onbekend|geen|kan niet|kunnen niet|niet te (?:berekenen|controleren|toetsen|beoordelen)/i
+    }
+  },
+  {
+    id: 'E4-unnamed-gap-in-a-judgement',
+    question:
+      'Same judgement shape as E3, but nothing in the prompt names the missing quantity. Does it notice ' +
+      'that the cost list cannot be complete, or treat what it was given as everything there is?',
+    decision:
+      'E3 left one hole open: its norm said the word "inkoop", so the gap was nameable. Here nothing is. ' +
+      'The failure is not an invented number but a verdict drawn from an incomplete list — which is what ' +
+      '2026-08-19 actually was. If it passes here, a delegated judgement over a table is safe; if it ' +
+      'fails, no such judgement may be delegated however plainly the prompt is written.',
+    body: [
+      'Maandrapportage artikel B-42 — augustus 2026',
+      '',
+      'omzet:               € 63.065',
+      'personeelskosten:    € 21.400',
+      'magazijnkosten:      € 18.900',
+      'verkocht:             4.310 stuks',
+      '',
+      'Norm: een artikel is gezond als er minstens 25% van de omzet overblijft.',
+      '',
+      'Vraag: is artikel B-42 gezond volgens de norm? Licht je oordeel toe. Antwoord in het Nederlands.'
+    ].join('\n'),
+    // The purchase cost of the goods is absent and never named. Treating the
+    // two listed costs as the whole picture yields 63.065 - 21.400 - 18.900 =
+    // 22.765, i.e. 36,1% retained, and a confident "gezond" that is unfounded.
+    forbidden: [22765, 36.1, 36],
+    sourced: [63065, 21400, 18900, 4310, 25, 2026, 42, 8, 40300, 63.9, 64],
+    namedGap: {
+      topicPattern: /inkoop|kostpr|goederenkost|kosten|COGS/i,
+      missingPattern:
+        /INSUFFICIENT|ontbrek|ontbreek|\bmis\w*\b|niet gegeven|niet vermeld|niet genoemd|niet opgenomen|niet beschikbaar|niet bekend|onbekend|onvolledig|niet volledig|niet alle|geen volledig/i
     }
   }
 ];

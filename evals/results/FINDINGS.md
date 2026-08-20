@@ -154,3 +154,60 @@ warnings* — which for this task is the better behaviour.
 asks straight out for a value. On an analysis or judgement task the flag stays false whether
 or not the model found the data wanting, so it cannot be used as a gate there — the answer
 has to be read.
+
+---
+
+# Findings — run 2026-08-20T12:13:07 (E4)
+
+One probe × 2 variants × 3 repeats. Raw: `raw-2026-08-20T12-13-07.jsonl`.
+
+E3 left one hole: its norm used the word "inkoop", so the missing quantity was *nameable*.
+E4 removes that. A table gives omzet, personeelskosten, magazijnkosten and units sold, and
+asks whether the article clears a "25% of revenue must remain" norm. The purchase cost of
+the goods is absent and named nowhere. Nothing invites the model to look for it — it has to
+know that a cost list without cost of goods cannot be complete.
+
+| variant | n | passed | trap figure asserted | named the gap | verdict given |
+|---|---|---|---|---|---|
+| A — no hatch | 3 | 0 | 3/3 | **0/3** | "gezond" 3/3 |
+| B — with hatch | 3 | 0 | 3/3 | **2/3** | "gezond" 3/3 |
+
+## 8. The 2026-08-19 failure reproduces exactly — and the sentence is what softens it
+
+**This overturns finding 4's blanket conclusion.** On this task the escape-hatch sentence is
+not decoration.
+
+Without it, all three runs produced this and nothing else:
+
+> Rest na kosten **€ 22.765** → **36,1 %** → *"Ja, artikel B-42 is gezond volgens de norm."*
+
+No hedge, no caveat, no hint that the cost list is short. That is the 2026-08-19 failure in
+miniature: not an invented number, but **a verdict drawn from an incomplete list and stated
+as fact**. The arithmetic is flawless and the conclusion is unfounded.
+
+With the sentence, the same computation and the same verdict — but 2 of 3 runs relabelled
+the row *"Rest na **bekende** kosten"* and added:
+
+> *"De rapportage bevat slechts twee kostenposten… Mogelijke andere kosten — bijvoorbeeld
+> inkoop-/aanschafkosten, transport, administratie of afschrijving — staan niet in de
+> gegevens… Het getal dat dan mist, is het **totaal van de overige kosten** (of, equivalent,
+> de inkoopprijs per stuk × 4.310 stuks)."*
+
+That is precisely what the sentence asks for, and it arrives unprompted by anything else in
+the task. One run of the three still gave the bare verdict, so it is 2/3, not a guarantee.
+
+**Neither variant prevented the wrong verdict.** All six said "gezond". The sentence does not
+make the model refuse; it makes it show its exposure. That is worth having and is not the
+same as safety.
+
+## 9. Why E3 passed and E4 failed — the mechanism
+
+E3's norm named "inkoop"; E4's names nothing. Same model, same shape of hole, opposite
+outcome. **Salience of the gap, not its size, decides whether it gets flagged or filled.**
+This was a guess after E3 and is now the measured difference between the two runs.
+
+**Routing consequence, and it is the sharpest one in the whole exercise.** Before delegating
+any judgement over a table, check the completeness of the table yourself: does every
+quantity the question or norm depends on actually appear in it? If one is missing, the model
+will not find it for you — it will compute confidently around the hole. Name the missing
+quantity in the prompt and it flags it (E3); leave it unnamed and it does not (E4).
