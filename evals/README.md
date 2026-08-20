@@ -13,7 +13,7 @@ does not belong here.
 
 ```bash
 npm run test:evals            # the graders and the anti-drift guards — fast, no GPU
-npm run evals                 # every probe, 3 repeats, ~30-45 min
+npm run evals                 # 47 probes, 3 repeats, ~90 min (summed from recorded wall times)
 node evals/run.mjs --only T1  # one probe
 node evals/run.mjs --repeats 1
 ```
