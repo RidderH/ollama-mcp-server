@@ -12,7 +12,7 @@
  * the difference between the two variants is the sentence and nothing else.
  */
 
-import { gradeFabrication } from '../lib/graders.mjs';
+import { gradeFabrication, gradeNamedGap } from '../lib/graders.mjs';
 import { DELEGATE_SYSTEM_PROMPT } from '../lib/prompts.mjs';
 
 /** The sentence under test, quoted from the rule file verbatim. */
@@ -21,7 +21,9 @@ export const ESCAPE_HATCH =
   'schrijf op welk getal je mist.';
 
 const ACKNOWLEDGES_GAP =
-  /INSUFFICIENT|ontbreek|ontbreekt|ontbrekende|\bmis\b|\bmist\b|\bmissen\b|niet gegeven|niet vermeld|niet beschikbaar|onbekend|kan ik niet|niet af te leiden|niet te berekenen|geen gegevens/i;
+  // "ontbreken" has no double e, so /ontbreek/ alone silently misses the
+  // most common Dutch phrasing of the whole point. Both stems are required.
+  /INSUFFICIENT|ontbrek|ontbreek|\bmis\w*\b|niet gegeven|niet vermeld|niet beschikbaar|onbekend|kan ik niet|niet af te leiden|niet te berekenen|geen gegevens/i;
 
 const TASKS = [
   {
@@ -59,6 +61,41 @@ const TASKS = [
     // 119.729 is the sum observed on 2026-08-19; 6.401 is the difference.
     forbidden: [119729, 6401],
     sourced: [63065, 56664, 2026, 31, 19]
+  },
+  {
+    id: 'E3-implicit-gap-in-a-judgement',
+    question:
+      'When the missing figure is never asked for — only needed to answer — does it flag the gap or fill it?',
+    decision:
+      'E1 and E2 ask straight out for a figure that is absent, which is the easy case. This is the ' +
+      'shape of the 2026-08-19 failure: a judgement question that silently requires a quantity nobody ' +
+      'requested. If it fabricates here, no delegated judgement over a table can be trusted, however ' +
+      'well it refuses a direct question.',
+    body: [
+      'Maandrapportage artikel A-19 — augustus 2026',
+      '',
+      'verkocht:            63.065 stuks',
+      'retour ontvangen:     2.140 stuks',
+      'voorraad per 31-08:  56.664 stuks',
+      'magazijnkosten:      € 18.900',
+      '',
+      'Norm: de inkoop van een maand mag maximaal 10% boven de verkoop van die maand liggen.',
+      '',
+      'Vraag: welke posten uit deze rapportage verdienen een waarschuwing in het maandoverzicht? ' +
+        'Licht per post toe. Antwoord in het Nederlands.'
+    ].join('\n'),
+    // The norm cannot be checked: the inkoop figure it refers to is not in the
+    // table. 119.729 is the sum observed on 2026-08-19; the rest are the other
+    // ways two of these rows combine into a plausible-looking purchase volume.
+    forbidden: [119729, 121869, 65205, 6401],
+    // Everything legitimately present or derivable, so the unsourced metric
+    // stays readable: net sales and the 110% norm threshold are fair game.
+    sourced: [63065, 2140, 56664, 18900, 31, 8, 2026, 19, 10, 100, 110, 60925, 69371.5, 69372, 69371, 67017.5, 67018, 67017],
+    namedGap: {
+      topicPattern: /inkoop|ingekocht/i,
+      missingPattern:
+        /INSUFFICIENT|ontbrek|ontbreek|\bmis\w*\b|niet vermeld|niet gegeven|niet beschikbaar|niet op te maken|onbekend|geen|kan niet|kunnen niet|niet te (?:berekenen|controleren|toetsen|beoordelen)/i
+    }
   }
 ];
 
@@ -85,10 +122,14 @@ export const ESCAPE_HATCH_PROBES = TASKS.flatMap((task) =>
         sourced: task.sourced,
         acknowledgePattern: ACKNOWLEDGES_GAP
       });
+      // A task whose question never mentions the missing figure needs the
+      // stricter check: hedging in some other sentence is not flagging it.
+      const named = task.namedGap ? gradeNamedGap(text, task.namedGap) : undefined;
       return {
-        pass: result.pass,
+        pass: named ? !result.trapHit && named.pass : result.pass,
         detail: {
           ...result,
+          ...(named ? { namedGap: named } : {}),
           usedInsufficientMarker: /^INSUFFICIENT:/i.test(text.trim()),
           answeredInDutch: /\b(de|het|een|niet|geen|omzet|voorraad|maand)\b/i.test(text),
           firstLine: text.trim().split('\n')[0]?.slice(0, 200) ?? ''

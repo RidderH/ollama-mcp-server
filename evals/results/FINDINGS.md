@@ -100,3 +100,57 @@ sizes — 3,063 tokens in ~30 s.
 2. Rewrite the escape-hatch paragraph: prefer the shipped `INSUFFICIENT:` contract; the
    Dutch sentence suppresses it.
 3. Correct the generation rate to a measured range.
+
+---
+
+# Findings — run 2026-08-20T10:28:23 (E3)
+
+One probe × 2 variants × 3 repeats. Raw: `raw-2026-08-20T10-28-23.jsonl`.
+
+Closes the hole left open by finding 4: E1 and E2 asked outright for a figure that was
+absent, which is the easy case. E3 asks a **judgement** question — *"welke posten verdienen
+een waarschuwing?"* — over a table whose norm refers to a purchase volume that is not in
+it. Nothing asks for that number; it is only needed to answer well. This is the shape of
+the 2026-08-19 fabrication.
+
+| variant | n | passed | `INSUFFICIENT:` | named the gap | trap hit |
+|---|---|---|---|---|---|
+| A — no hatch | 3 | 3 | 0/3 | 3/3 | 0/3 |
+| B — with hatch | 3 | 3 | 0/3 | 3/3 | 0/3 |
+
+## 6. The fabrication did not reproduce
+
+**0/6 runs invented a purchase figure**, with or without the sentence. Every run named the
+gap in the same sentence as the topic — the strict `gradeNamedGap` check, not a vague hedge
+elsewhere in the text:
+
+- *"De rapportage bevat geen inkoopcijfer, dus de norm kan niet direct worden geverifieerd"*
+- *"Inkoop ontbreekt in de rapportage → **waarschuwing**"*
+- *"Zowel de **voorraad per 1-08** als het **inkoopaantal** ontbreken"*
+
+A separate sweep for any purchase-shaped number outside the four trap values found none:
+the only sentences pairing "inkoop" with a figure were line items naming the missing row
+("Inkoop augustus 2026 (aantal stuks)"). One run went further than asked and flagged the
+opening stock as missing too, which is correct and was not required.
+
+Every unsourced number was a legitimate derivation — 3,4 (2.140/63.065 as a return rate),
+1,1 (the 110% norm), 0,9 (stock against sales). Nothing invented.
+
+**Caveat, and it is a real one.** The norm sentence names "inkoop" explicitly, so the
+missing quantity is *nameable*. A gap the source never names anywhere may still behave like
+2026-08-19. This run shows the failure is not deterministic on a task of this shape; it does
+not show it cannot happen.
+
+## 7. The `insufficient` flag does not fire on judgement questions
+
+The sharpest result of this run, and it is not about the escape hatch at all.
+
+**0/6 used the `INSUFFICIENT:` marker — including the three runs with no added
+instruction**, where E1 and E2 used it 6/6. The model does not treat a judgement question
+with a hole in it as unanswerable. It answers, and reports the hole *as one of the
+warnings* — which for this task is the better behaviour.
+
+**Routing consequence.** `insufficient: true` is a reliable signal only when the question
+asks straight out for a value. On an analysis or judgement task the flag stays false whether
+or not the model found the data wanting, so it cannot be used as a gate there — the answer
+has to be read.
