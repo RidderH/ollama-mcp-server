@@ -1,0 +1,34 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T15-50-13",
+  "repeats": 3,
+  "probes": [
+    {
+      "probe": "D3-very-long-answer",
+      "gap": "dutch_fidelity",
+      "question": "Near the generation budget the rule file already sets — some 2.500 to 3.500 tokens — does the Dutch still hold, and do the figures still carry their separators?",
+      "decision": "Sets the length at which a Dutch write-up may be delegated. The rule tells you to budget about 5.000 generated tokens; this establishes whether fidelity survives that far, or whether length has to be capped for a different reason than the wall clock.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 78013,
+      "wallMsMax": 90933,
+      "coldWallMs": 78013,
+      "warmWallMs": [
+        86856,
+        90933
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        530,
+        530,
+        530
+      ],
+      "outputTokens": [
+        2056,
+        2574,
+        2602
+      ]
+    }
+  ]
+}

@@ -603,3 +603,59 @@ channels through which something can be said will score every unenumerated chann
 silence — and silence is exactly the finding these probes are hunting for, so the error runs
 in the direction that manufactures the conclusion. Enumerate from the raw output of a real
 run before writing the pass rule, never from the schema you asked for.
+
+---
+
+# Run 7 — 2026-08-20, gap #7: Dutch number and language fidelity
+
+Half of this gap was already on disk. The other half — length — was not, and needed three
+probes over the same document at three answer lengths.
+
+## 30. No language drift anywhere, in 144 Dutch answers
+
+**The existing corpus: 135 Dutch-prompted answers, not one containing a word that exists in
+English and not in Dutch.** The nine fresh runs add the same result at lengths the corpus
+never reached. The longest recorded Dutch answer before today was 2.412 characters; D3 ran to
+**9.327 characters and 2.602 output tokens** and its closing sentence is still Dutch.
+
+**The first scan of the corpus said nine answers had drifted, and all nine were false.** Three
+were the transform probes faithfully preserving English comments in a JavaScript fixture, and
+six were the detector flagging `is`, `dat`, `die` and `over` — every one of them a Dutch word.
+The planner probes trip any such scan too, since `SELECT … FROM … WHERE` is not prose. The
+grader now uses a list of words that exist in English and not in Dutch, and its known-bad
+fixture is a Dutch paragraph containing exactly those homographs, which must pass.
+
+## 31. Dutch notation survives the round trip exactly — 8/8 figures, every run, every length
+
+Eight figures were chosen for the ways the notation can break: a thousands group with a
+decimal tail (`468.301,25`), a bare thousands group (`4.017`), a decimal under a thousand
+(`116,58`). Across nine runs at three lengths, all eight came back **exact** — not merely
+correct in value, but character for character, with their separators. Zero anglicised, zero
+even reformatted to a valid-but-different Dutch rendering.
+
+Figures the model computed itself came out in Dutch notation too, and correct: `€ 1,96` for
+the fall in average order value, `15,4 procent` for the rise in units (535 / 3.482 = 15,36 %).
+
+Taken with finding 21, the round trip is closed in both directions: Dutch source notation
+read into JSON numbers exactly, and Dutch notation written back out of computed values.
+
+## 32. What degrades with length is not the language — it is the substance
+
+Distinct-trigram ratio, three runs at each length:
+
+| probe | output tokens | distinct-3 | distinct-5 |
+|---|---|---|---|
+| D1 short | 166–194 | 0,98–1,00 | 1,00 |
+| D2 long | 1.154–1.236 | 0,86–0,92 | 0,94–0,98 |
+| D3 very long | 2.056–2.602 | 0,78–0,85 | 0,92–0,95 |
+
+At 2.600 output tokens roughly a fifth of the trigrams are repeats, and it reads exactly like
+that: *"Door in het personeel te investeren kan het bedrijf ook de motivatie van de werknemers
+verhogen … Door een duidelijk investeringsplan op te stellen kan het bedrijf ook de financiële
+gezondheid waarborgen."* The Dutch is correct, the figures are right, and the last third
+restates the middle third.
+
+So the constraint on a long Dutch write-up is not fidelity and not the wall clock — 91 s for
+2.602 tokens sits well inside the 300 s ceiling. It is that asking for more prose past roughly
+a thousand tokens buys padding. **Ask for the length the answer needs, not the length that
+looks thorough.**

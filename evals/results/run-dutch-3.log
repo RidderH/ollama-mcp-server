@@ -1,0 +1,13 @@
+model: qwen3.8:27b-mlx
+probes: 1 x 3 repeats = 3 calls
+raw: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/raw-2026-08-20T15-50-13.jsonl
+
+warm-up: loading the model… 397 ms
+D3-very-long-answer [1/3] … pass (78s, 530p/2056o)
+D3-very-long-answer [2/3] … pass (87s, 530p/2574o)
+D3-very-long-answer [3/3] … pass (91s, 530p/2602o)
+
+--- summary (worst case governs) ---
+D3-very-long-answer: 3/3 passed, 78s cold (then 87/91s cached)
+
+summary: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/summary-2026-08-20T15-50-13.json

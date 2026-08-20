@@ -1,0 +1,61 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T15-47-37",
+  "repeats": 3,
+  "probes": [
+    {
+      "probe": "D1-short-answer",
+      "gap": "dutch_fidelity",
+      "question": "In a short Dutch answer, do the figures come back in Dutch notation and the prose stay Dutch?",
+      "decision": "The control. If a short answer already anglicises a figure, length is not the variable and the problem is the model, not the drift.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 2884,
+      "wallMsMax": 5260,
+      "coldWallMs": 5260,
+      "warmWallMs": [
+        2884,
+        3117
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        447,
+        447,
+        447
+      ],
+      "outputTokens": [
+        194,
+        175,
+        166
+      ]
+    },
+    {
+      "probe": "D2-long-answer",
+      "gap": "dutch_fidelity",
+      "question": "The corpus has no Dutch answer longer than ~600 tokens. Over several times that, does the language hold and do the figures keep their Dutch notation?",
+      "decision": "Decides whether a long Dutch write-up can be delegated at all, or whether only short answers can. Drift beginning late in an answer is the dangerous case: the opening reads fine, so a spot check passes and the tail ships.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 27566,
+      "wallMsMax": 31136,
+      "coldWallMs": 31136,
+      "warmWallMs": [
+        30470,
+        27566
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        481,
+        481,
+        481
+      ],
+      "outputTokens": [
+        1173,
+        1236,
+        1154
+      ]
+    }
+  ]
+}
