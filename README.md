@@ -47,6 +47,59 @@ pinned to that project:
 
 Verify it loaded with `/mcp` inside Claude Code.
 
+## Example
+
+Two calls, with the figures they actually returned on an Apple-silicon machine running
+`qwen3.8:27b-mlx`.
+
+**Text in, structure out.** The orchestrator hands over captured output and asks for a verdict, and
+gets one back without spending its own context on the log:
+
+```jsonc
+// ollama_delegate_task
+{
+  "instructions": "Below is the tail of a CI log. Name every test that failed and, for each, the one line that explains why. If nothing failed, answer exactly: no failures.",
+  "context_text": "<4000 lines of log output>",
+  "disable_thinking": true
+}
+```
+
+**A picture in.** A context file that really is an image goes to the model as an image, so a scanned
+table becomes readable data:
+
+```jsonc
+// ollama_delegate_task
+{
+  "instructions": "Read every row of the table in this image and return JSON: {\"rows\": [{\"quantity\": <int>, \"description\": \"<text>\", \"amount\": <number>}]}. If you cannot see the image, invent nothing and answer {\"readable\": false}.",
+  "context_files": ["crop.png"],
+  "num_ctx": 16384,
+  "disable_thinking": true,
+  "response_format": "json"
+}
+```
+
+```json
+{
+  "output": "{ \"readable\": true, \"rows\": [ ... ] }",
+  "model": "qwen3.8:27b-mlx",
+  "insufficient": false,
+  "prompt_tokens": 1369,
+  "output_tokens": 601,
+  "duration_ms": 25832,
+  "context_files_read": 1,
+  "images_sent": 1
+}
+```
+
+A 126 KB PNG of a ten-row table cost **1.369 prompt tokens and 26 seconds**, and every one of the 31
+extracted fields matched the known-good answer. Budget a page-sized image at roughly 1–2k tokens.
+
+Two habits are worth copying from these calls. Give the model an **escape hatch** — a defined way to
+say "I cannot" — so a gap in the input produces `{"readable": false}` instead of a confident
+invention. And keep the instructions **complete on their own**: the local model sees none of the
+conversation that led to the call.
+
+
 ## Tools
 
 | Tool | Writes to disk | What it does |
@@ -82,7 +135,7 @@ model cannot read.
 Applies one instruction to each of up to 50 files, one request per file, writing results in place and
 returning a unified diff for each. Suitable for repetitive edits that need no cross-file reasoning.
 
-Three safeguards, because an 8B model rewriting your source files deserves them:
+Three safeguards, because a small local model rewriting your source files deserves them:
 
 - **`dry_run: true`** computes every diff without writing anything.
 - **Truncation guard** — output that comes back under 40% of the original length is discarded rather
@@ -147,4 +200,4 @@ doesn't yet expose the `execution.taskSupport` field. When that stabilises, the 
 
 ## Licence
 
-MIT
+MIT — see [LICENSE](LICENSE).

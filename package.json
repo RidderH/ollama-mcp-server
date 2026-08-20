@@ -2,6 +2,26 @@
   "name": "ollama-mcp-server",
   "version": "1.0.0",
   "description": "MCP server that lets an orchestrating agent delegate self-contained subtasks to a local model running under Ollama",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ollama",
+    "llm",
+    "local-llm",
+    "claude-code",
+    "agent",
+    "delegation"
+  ],
+  "homepage": "https://github.com/RidderH/ollama-mcp-server#readme",
+  "bugs": {
+    "url": "https://github.com/RidderH/ollama-mcp-server/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RidderH/ollama-mcp-server.git"
+  },
+  "license": "MIT",
+  "author": "Knight B.V.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -15,10 +35,11 @@
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "clean": "rm -rf dist",
-    "test": "npm run build && node --test tests/*.test.js"
+    "test": "npm run build && node --test tests/*.test.js",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
