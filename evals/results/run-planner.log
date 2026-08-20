@@ -1,0 +1,33 @@
+model: qwen3.8:27b-mlx
+probes: 6 x 3 repeats = 18 calls
+raw: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/raw-2026-08-20T13-26-42.jsonl
+
+warm-up: loading the model… 554 ms
+P1-awk-csv-total [1/3] … FAIL (72s, 410p/2810o)
+P1-awk-csv-total [2/3] … FAIL (81s, 410p/2189o)
+P1-awk-csv-total [3/3] … pass (156s, 410p/3254o)
+P2-jq-json-total [1/3] … FAIL (142s, 385p/3962o)
+P2-jq-json-total [2/3] … FAIL (129s, 385p/3798o)
+P2-jq-json-total [3/3] … FAIL (104s, 385p/3131o)
+P3-sqlite-total [1/3] … pass (41s, 388p/1226o)
+P3-sqlite-total [2/3] … pass (46s, 388p/1412o)
+P3-sqlite-total [3/3] … pass (45s, 388p/1390o)
+P4-python-csv-total [1/3] … pass (53s, 412p/1668o)
+P4-python-csv-total [2/3] … pass (40s, 412p/1299o)
+P4-python-csv-total [3/3] … pass (43s, 412p/1410o)
+P6-awk-csv-total-dialect-named [1/3] … pass (97s, 456p/2952o)
+P6-awk-csv-total-dialect-named [2/3] … pass (103s, 456p/3251o)
+P6-awk-csv-total-dialect-named [3/3] … pass (92s, 456p/3081o)
+P5-awk-csv-top3 [1/3] … pass (104s, 423p/3293o)
+P5-awk-csv-top3 [2/3] … FAIL (101s, 423p/3092o)
+P5-awk-csv-top3 [3/3] … FAIL (100s, 423p/3119o)
+
+--- summary (worst case governs) ---
+P1-awk-csv-total: 1/3 passed, 72-156s
+P2-jq-json-total: 0/3 passed, 104-142s
+P3-sqlite-total: 3/3 passed, 41-46s
+P4-python-csv-total: 3/3 passed, 40-53s
+P6-awk-csv-total-dialect-named: 3/3 passed, 92-103s
+P5-awk-csv-top3: 1/3 passed, 100-104s
+
+summary: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/summary-2026-08-20T13-26-42.json

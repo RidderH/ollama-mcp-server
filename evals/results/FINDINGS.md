@@ -211,3 +211,77 @@ any judgement over a table, check the completeness of the table yourself: does e
 quantity the question or norm depends on actually appear in it? If one is missing, the model
 will not find it for you — it will compute confidently around the hole. Name the missing
 quantity in the prompt and it flags it (E3); leave it unnamed and it does not (E4).
+
+---
+
+# Findings — run 2026-08-20T13:26:42 (planner pattern, gap #3)
+
+6 probes × 3 repeats. Raw: `raw-2026-08-20T13-26-42.jsonl`.
+
+The rule file's strongest recommendation — *"reach for this first whenever a task scales with
+row count"* — rested on one `awk` one-liner. These probes send the header, one sample row and
+the question, never the data, and **execute what comes back** against a 200-row fixture whose
+answer was verified independently (`207862.49`). A reference solution was written by hand for
+every tool first, and all five produce that answer, so no probe asks the impossible.
+
+| probe | tool | n | passed | wall | how the failures failed |
+|---|---|---|---|---|---|
+| P3-sqlite-total | sqlite3 | 3 | **3/3** | 41–46 s | — |
+| P4-python-csv-total | python3 | 3 | **3/3** | 40–53 s | — |
+| P6-awk-total-dialect-named | awk | 3 | **3/3** | 92–103 s | — |
+| P1-awk-csv-total | awk | 3 | 1/3 | 72–156 s | **silent**: exit 0, plausible number |
+| P5-awk-csv-top3 | awk | 3 | 1/3 | 100–104 s | **silent**: exit 0, garbage categories |
+| P2-jq-json-total | jq | 3 | 0/3 | 104–142 s | loud: exit 3, empty stdout |
+
+## 10. The pattern itself holds, and it is cheap
+
+Every prompt cost **385–456 tokens** regardless of the 200 rows behind it, and the correct
+answers were exact to the cent from a model that never saw a data row. The claim that a model
+which cannot count 500 rows can still write the command that counts them is **confirmed** —
+that part of the rule survives contact with four tools and an ugly schema.
+
+What does not survive is "reach for this first" without saying *with which tool*.
+
+## 11. `awk` fails silently; `jq` fails loudly; sqlite and python do not fail
+
+This distinction matters more than the pass rate.
+
+**Silent (awk).** Two of three unqualified runs used `FPAT`, which is a **gawk** extension. BSD
+awk — what macOS ships, and gawk is not installed here — ignores the flag without a word:
+
+```
+awk -v FPAT='([^,]*)|("[^"]*")' '…' boekingen.csv   →  exit 0, empty stderr, "0.00"
+```
+
+The other silent failure printed `0.97`. On P5 the garbage was more visible (`filiaal 84.00`,
+`zn.", 0.00` as category names) but still exited 0. **A well-formed wrong number with no error
+is the worst outcome this pattern can produce**, and it is what awk produced 4 times out of 6.
+
+**Loud (jq).** All three jq runs failed identically: `jq: error: gsub/1 is not defined`. The
+model wrote `gsub(",", ".")` with a comma where jq separates arguments with a semicolon — and
+got the neighbouring `gsub("\\."; "")` right in the same expression. A specific, reproducible
+confusion, not general incompetence. Cost: a retry. Risk: none.
+
+**Clean (sqlite3, python3).** 3/3 each, and roughly **twice as fast** as the awk attempts
+(41–53 s against 72–156 s) on a third to a half of the output tokens. The tools it is fluent
+in are also the cheap ones.
+
+## 12. Naming the dialect fixed it, 1/3 → 3/3
+
+P6 is P1 plus one sentence: *"dit draait op macOS met de BSD-versie van awk, niet gawk;
+FPAT, gensub() en IGNORECASE bestaan daar niet"*.
+
+All three runs then abandoned `FPAT` and hand-rolled a character-by-character CSV parser —
+the portable approach, and the same one the single passing P1 run had found on its own. The
+model knows how to do it; unprompted, it reaches for the extension first.
+
+Whether "name the pitfall" generalises beyond awk is untested: it is one tool, n=3.
+
+## 13. What this changes
+
+1. **Prefer sqlite3 or python3.** 3/3, fastest, cheapest, no dialect trap.
+2. **If it must be awk, name the dialect in the prompt.** One sentence, 1/3 → 3/3.
+3. **"Run the command and check its output" is not enough** — that is what the rule says now,
+   and it would have passed `0.00` straight through. Verification has to be able to fail:
+   run the command against a small slice whose answer you already know, or have a second tool
+   agree, before trusting it on the full data.

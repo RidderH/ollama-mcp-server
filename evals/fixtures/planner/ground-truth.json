@@ -1,0 +1,10 @@
+{
+  "totalInkoop": "207862.49",
+  "top3": "inkoop\t207862.49\nverkoop\t129871.90\noverig\t117807.87",
+  "rowsWithAmount": 199,
+  "allTotals": {
+    "inkoop": "207862.49",
+    "verkoop": "129871.90",
+    "overig": "117807.87"
+  }
+}

@@ -17,8 +17,9 @@ import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { generate, DEFAULT_MODEL, MCP_CALL_CEILING_MS } from './lib/ollama.mjs';
 import { TRANSFORM_PROBES } from './probes/transform.mjs';
 import { ESCAPE_HATCH_PROBES } from './probes/escape-hatch.mjs';
+import { PLANNER_PROBES } from './probes/planner.mjs';
 
-const ALL_PROBES = [...TRANSFORM_PROBES, ...ESCAPE_HATCH_PROBES];
+const ALL_PROBES = [...TRANSFORM_PROBES, ...ESCAPE_HATCH_PROBES, ...PLANNER_PROBES];
 
 function parseArgs(argv) {
   const args = { repeats: 3, only: undefined };
@@ -126,7 +127,7 @@ async function main() {
         };
         process.stderr.write(`ERROR after ${Math.round(result.wallMs / 1000)}s: ${result.error}\n`);
       } else {
-        const graded = probe.grade(probe.output === 'text' ? result.cleanedText : result.cleanedFile);
+        const graded = await probe.grade(probe.output === 'text' ? result.cleanedText : result.cleanedFile);
         run = {
           probe: probe.id,
           gap: probe.gap,
