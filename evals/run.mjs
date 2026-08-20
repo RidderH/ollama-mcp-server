@@ -20,13 +20,15 @@ import { ESCAPE_HATCH_PROBES } from './probes/escape-hatch.mjs';
 import { PLANNER_PROBES } from './probes/planner.mjs';
 import { HAYSTACK_PROBES } from './probes/haystack.mjs';
 import { STRUCTURED_PROBES } from './probes/structured.mjs';
+import { CLASSIFY_PROBES } from './probes/classify.mjs';
 
 const ALL_PROBES = [
   ...TRANSFORM_PROBES,
   ...ESCAPE_HATCH_PROBES,
   ...PLANNER_PROBES,
   ...HAYSTACK_PROBES,
-  ...STRUCTURED_PROBES
+  ...STRUCTURED_PROBES,
+  ...CLASSIFY_PROBES
 ];
 
 function parseArgs(argv) {
@@ -125,7 +127,13 @@ async function main() {
       const label = `${probe.id} [${repeat}/${args.repeats}]`;
       process.stderr.write(`${label} … `);
 
-      const { system, prompt, options = {} } = probe.build();
+      // Repeats send identical bytes unless a probe chooses otherwise, and
+      // finding 25 showed that makes n=3 into n=1 wherever the answer is
+      // short: 8 of 10 structured-output probes returned byte-identical text
+      // on all three repeats. A probe that varies something harmless with the
+      // repeat number -- the order of its rows, say -- buys back three real
+      // observations, and defeats the prompt cache while it is at it.
+      const { system, prompt, options = {} } = probe.build(repeat);
       const result = await generate({ system, prompt, ...options });
 
       let run;

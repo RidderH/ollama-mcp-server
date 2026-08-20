@@ -523,3 +523,83 @@ to thousands of tokens, where sampling diverges early and the repeats are real. 
 document, the order of the rows, the temperature) before its 3/3 may be read as three
 observations. Finding 20 established that repeats are invalid for latency; this narrows them
 further, for short outputs, on correctness.
+
+---
+
+# Run 6 — 2026-08-20, gap #6: classification against a fixed list
+
+The rule file has listed "classifying against a fixed list" as a delegate case since before
+anything was measured. Accuracy on the easy rows was never the question. The question is the
+row that belongs in **none** of the offered categories, because its answer comes back looking
+exactly like a right one.
+
+Fixture: `evals/fixtures/classify/kosten.json` — ten Dutch expense lines, four of which a
+bookkeeper would post outside all four categories on offer (notary fees on incorporation,
+solar panels, an Excel course, a director's health insurance). Two levers crossed: is
+`"overig"` among the choices, and is there a `zekerheid: "hoog" | "laag"` field. **n=6, and
+every repeat rotates the row order** — the first probe run since finding 25 to do so, and it
+worked: outputs varied run to run where the structured-output probes had been byte-identical.
+
+## 26. A closed list fails two ways, and both look like a successful call
+
+C1, no escape category, no confidence field, 6 runs:
+
+| outcome | runs | what the caller gets |
+|---|---|---|
+| refused wholesale | **2/6** | `INSUFFICIENT: De categorieën … dekken niet alle regels af`, no JSON at all, the tool's `insufficient` flag set |
+| silently forced | **4/6** | ten valid labels, six of them right, `insufficient` false, schema-valid JSON, no hint anywhere |
+
+The forcing is not a considered judgement, which is visible in how unstable it is across
+repeats. "Cursus Excel voor drie medewerkers" was filed under `reiskosten` in one run and
+`software` in another; "Ziektekostenverzekering directeur" went to `reiskosten` once and
+`representatie` the next time. The six answerable rows were right in every non-refusing run.
+
+**The refusal and the fabrication are the same task, minutes apart.** Nothing about the
+prompt distinguishes them, so a caller cannot plan around the good case.
+
+## 27. An escape category fixes it outright — 6/6, and no over-use
+
+C2, `"overig"` added to the four categories and one sentence saying when to use it: **6/6 runs
+classified all ten rows correctly**, reaching for `"overig"` on exactly the four that needed
+it and on no other row, across six different row orders. No invented category in any run, in
+any variant.
+
+This is the same lever as gap #5's nullable field, and it is worth naming as one thing:
+**the model's honesty is governed by whether the answer format has somewhere to put "this one
+does not fit".** Given the slot it uses it precisely; denied the slot it either refuses
+everything or forces everything, with nothing in between.
+
+## 28. Where the list cannot be opened, a confidence field recovers the signal
+
+C3, closed list plus `zekerheid`: **6/6 usable**, and the flag landed on **24 of 24** forced
+rows over the six runs — every unclassifiable row, every time. The cost is one false alarm on
+an easy row in 3 of 6 runs, and it is the same row each time: R5, "Q-Park Amsterdam, parkeren
+3 uur", filed under `reiskosten` and flagged `laag`. That is a defensible doubt rather than
+noise, which is the distinction that makes the flag worth reading.
+
+C4, both levers at once, is where the confidence field stops carrying information: with
+`"overig"` available the four hard rows go there marked `hoog` — correctly, since `"overig"`
+*is* the confident answer — so `zekerheid` flags 0/4 hard rows and keeps flagging R5. Adding
+both is harmless and buys nothing over the escape category alone.
+
+## 29. A grader defect this run caught, and the shape it had
+
+The first pass of this probe scored C1 as a uniform silent failure. It was not: one run in
+three had written `INSUFFICIENT: de regels R6, R7, R8 en R9 kunnen niet worden toegewezen`
+ahead of a JSON body that forced all four anyway. The grader inspected only the classified
+rows, so a signal that existed in the answer was scored as its absence.
+
+Two things made it invisible. The signal lived in the one channel not enumerated — prose
+outside the JSON — and it reached the caller's text only because a malformed thinking block
+(a `</think>` with no opening tag, which `stripThinkBlocks` cannot match) left it in place.
+
+Fixed: prose naming a hard row now counts as a signal, alongside breaking the vocabulary and
+flagging low confidence, and the probe records whether `src/tools/delegate.ts`'s own
+`/^INSUFFICIENT:/` test would have fired. The known-bad fixtures separate naming the rows
+from hedging without naming them, and the channel was watched failing before it was believed.
+
+**The lesson is about grader design, not about the model.** A grader that enumerates the
+channels through which something can be said will score every unenumerated channel as
+silence — and silence is exactly the finding these probes are hunting for, so the error runs
+in the direction that manufactures the conclusion. Enumerate from the raw output of a real
+run before writing the pass rule, never from the schema you asked for.

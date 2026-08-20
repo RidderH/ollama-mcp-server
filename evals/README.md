@@ -41,6 +41,10 @@ compiled original by a test — `npm run build && npm run test:evals`.
   fixture asserting `pass === false`, and both anti-drift guards were watched going red on
   an injected divergence before being trusted. A grader only ever seen passing proves
   nothing about the run where the model misbehaves.
+- **Vary something between repeats.** Identical prompt bytes plus a short answer reproduce
+  exactly — 8 of 10 structured-output probes returned byte-identical text on all three
+  repeats, making n=3 into n=1. The classification probes rotate their row order with the
+  repeat number, which `run.mjs` passes to `build(repeat)`; grade by id, never by position.
 - **n=3, worst case governs.** Routing should be decided by the floor, not the average: one
   bad run in three is a case that will come up. n=1 is exactly what left the existing rule
   hedging.
@@ -67,6 +71,10 @@ temperature and disable_thinking), so repeats are the only control over variance
 | `S4-nullable` | structured output | whether a schema may contain a field the source cannot fill |
 | `S5`/`S6` | structured output | whether `format` would have to force `disable_thinking` with it |
 | `S7`/`S8` | structured output | whether `format` constrains anything at all, or only the prompt does |
+| `C1-closed-list` | classification | whether a fixed list may be offered without a "none of these" |
+| `C2-escape-offered` | classification | whether an escape category is enough on its own |
+| `C3-closed-with-doubt` | classification | whether a confidence field can stand in for an escape category |
+| `C4-escape-and-doubt` | classification | whether the confidence field still discriminates once nothing is forced |
 
 The `S` probes run twice each: **A** with the JSON Schema pasted into the prompt, which is what
 the tools can do today, and **B** with the same prompt plus Ollama's own `format` field, which
