@@ -1,0 +1,41 @@
+model: qwen3.8:27b-mlx
+probes: 8 x 3 repeats = 24 calls
+raw: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/raw-2026-08-20T09-45-33.jsonl
+
+warm-up: loading the model… 579 ms
+T1-preserve-small [1/3] … FAIL (59s, 932p/2737o)
+T1-preserve-small [2/3] … FAIL (31s, 932p/1472o)
+T1-preserve-small [3/3] … FAIL (39s, 932p/1669o)
+T3-preserve-large [1/3] … FAIL (190s, 3063p/4920o)
+T3-preserve-large [2/3] … FAIL (154s, 3063p/4852o)
+T3-preserve-large [3/3] … FAIL (123s, 3063p/4966o)
+T2-no-op-instruction [1/3] … FAIL (13s, 429p/508o)
+T2-no-op-instruction [2/3] … FAIL (13s, 429p/508o)
+T2-no-op-instruction [3/3] … FAIL (13s, 429p/508o)
+T4-unknowable-rename [1/3] … pass (7s, 394p/174o)
+T4-unknowable-rename [2/3] … pass (8s, 394p/275o)
+T4-unknowable-rename [3/3] … pass (5s, 394p/164o)
+E1-margin-without-cogs--A-no-hatch [1/3] … pass (11s, 201p/321o)
+E1-margin-without-cogs--A-no-hatch [2/3] … pass (10s, 201p/321o)
+E1-margin-without-cogs--A-no-hatch [3/3] … pass (10s, 201p/305o)
+E1-margin-without-cogs--B-with-hatch [1/3] … pass (12s, 236p/346o)
+E1-margin-without-cogs--B-with-hatch [2/3] … pass (12s, 236p/371o)
+E1-margin-without-cogs--B-with-hatch [3/3] … pass (10s, 236p/323o)
+E2-purchases-without-opening-stock--A-no-hatch [1/3] … pass (23s, 198p/642o)
+E2-purchases-without-opening-stock--A-no-hatch [2/3] … pass (15s, 198p/489o)
+E2-purchases-without-opening-stock--A-no-hatch [3/3] … pass (14s, 198p/438o)
+E2-purchases-without-opening-stock--B-with-hatch [1/3] … pass (12s, 233p/355o)
+E2-purchases-without-opening-stock--B-with-hatch [2/3] … pass (11s, 233p/380o)
+E2-purchases-without-opening-stock--B-with-hatch [3/3] … pass (11s, 233p/357o)
+
+--- summary (worst case governs) ---
+T1-preserve-small: 0/3 passed, 31-59s
+T3-preserve-large: 0/3 passed, 123-190s
+T2-no-op-instruction: 0/3 passed, 13-13s
+T4-unknowable-rename: 3/3 passed, 5-8s
+E1-margin-without-cogs--A-no-hatch: 3/3 passed, 10-11s
+E1-margin-without-cogs--B-with-hatch: 3/3 passed, 10-12s
+E2-purchases-without-opening-stock--A-no-hatch: 3/3 passed, 14-23s
+E2-purchases-without-opening-stock--B-with-hatch: 3/3 passed, 11-12s
+
+summary: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/summary-2026-08-20T09-45-33.json

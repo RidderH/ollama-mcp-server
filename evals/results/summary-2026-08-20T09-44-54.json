@@ -1,0 +1,25 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T09-44-54",
+  "repeats": 1,
+  "probes": [
+    {
+      "probe": "T2-no-op-instruction",
+      "gap": "transform_files",
+      "question": "Given an instruction that matches nothing in the file, does the model leave it alone?",
+      "decision": "A gratuitous edit here means an instruction must never be aimed at a batch where some files are out of scope — every file has to match, or the batch has to be filtered first.",
+      "n": 1,
+      "passes": 0,
+      "worstCase": "at least one failure",
+      "wallMsMin": 11968,
+      "wallMsMax": 11968,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        429
+      ],
+      "outputTokens": [
+        508
+      ]
+    }
+  ]
+}

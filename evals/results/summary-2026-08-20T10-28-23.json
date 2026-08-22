@@ -1,0 +1,51 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T10-28-23",
+  "repeats": 3,
+  "probes": [
+    {
+      "probe": "E3-implicit-gap-in-a-judgement--A-no-hatch",
+      "gap": "escape_hatch",
+      "question": "When the missing figure is never asked for — only needed to answer — does it flag the gap or fill it?",
+      "decision": "E1 and E2 ask straight out for a figure that is absent, which is the easy case. This is the shape of the 2026-08-19 failure: a judgement question that silently requires a quantity nobody requested. If it fabricates here, no delegated judgement over a table can be trusted, however well it refuses a direct question.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 82795,
+      "wallMsMax": 117780,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        244,
+        244,
+        244
+      ],
+      "outputTokens": [
+        3527,
+        3768,
+        2496
+      ]
+    },
+    {
+      "probe": "E3-implicit-gap-in-a-judgement--B-with-hatch",
+      "gap": "escape_hatch",
+      "question": "When the missing figure is never asked for — only needed to answer — does it flag the gap or fill it?",
+      "decision": "E1 and E2 ask straight out for a figure that is absent, which is the easy case. This is the shape of the 2026-08-19 failure: a judgement question that silently requires a quantity nobody requested. If it fabricates here, no delegated judgement over a table can be trusted, however well it refuses a direct question.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 76980,
+      "wallMsMax": 90940,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        279,
+        279,
+        279
+      ],
+      "outputTokens": [
+        2064,
+        2615,
+        2307
+      ]
+    }
+  ]
+}

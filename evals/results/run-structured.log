@@ -1,0 +1,49 @@
+model: qwen3.8:27b-mlx
+probes: 10 x 3 repeats = 30 calls
+raw: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/raw-2026-08-20T15-21-55.jsonl
+
+warm-up: loading the model… 485 ms
+S1-flat--A-prompt-only [1/3] … pass (3s, 490p/37o)
+S1-flat--A-prompt-only [2/3] … pass (1s, 490p/37o)
+S1-flat--A-prompt-only [3/3] … pass (1s, 490p/37o)
+S1-flat--B-native-format [1/3] … pass (1s, 490p/37o)
+S1-flat--B-native-format [2/3] … pass (1s, 490p/37o)
+S1-flat--B-native-format [3/3] … pass (1s, 490p/37o)
+S2-nested--A-prompt-only [1/3] … pass (7s, 640p/264o)
+S2-nested--A-prompt-only [2/3] … pass (4s, 640p/264o)
+S2-nested--A-prompt-only [3/3] … pass (4s, 640p/264o)
+S2-nested--B-native-format [1/3] … pass (4s, 640p/264o)
+S2-nested--B-native-format [2/3] … pass (4s, 640p/264o)
+S2-nested--B-native-format [3/3] … pass (4s, 640p/264o)
+S3-enum--A-prompt-only [1/3] … pass (3s, 568p/77o)
+S3-enum--A-prompt-only [2/3] … pass (1s, 568p/77o)
+S3-enum--A-prompt-only [3/3] … pass (1s, 568p/77o)
+S3-enum--B-native-format [1/3] … pass (2s, 568p/141o)
+S3-enum--B-native-format [2/3] … pass (1s, 568p/77o)
+S3-enum--B-native-format [3/3] … pass (3s, 568p/141o)
+S4-nullable--A-prompt-only [1/3] … pass (5s, 580p/201o)
+S4-nullable--A-prompt-only [2/3] … pass (4s, 580p/201o)
+S4-nullable--A-prompt-only [3/3] … pass (3s, 580p/201o)
+S4-nullable--B-native-format [1/3] … pass (3s, 580p/201o)
+S4-nullable--B-native-format [2/3] … pass (3s, 580p/201o)
+S4-nullable--B-native-format [3/3] … pass (3s, 580p/201o)
+S6-prompt-only-thinking-on [1/3] … pass (6s, 488p/288o)
+S6-prompt-only-thinking-on [2/3] … pass (5s, 488p/288o)
+S6-prompt-only-thinking-on [3/3] … pass (7s, 488p/361o)
+S5-native-format-thinking-on [1/3] … pass (7s, 741p/37o)
+S5-native-format-thinking-on [2/3] … pass (7s, 739p/37o)
+S5-native-format-thinking-on [3/3] … pass (6s, 739p/37o)
+
+--- summary (worst case governs) ---
+S1-flat--A-prompt-only: 3/3 passed, 3s cold (then 1/1s cached)
+S1-flat--B-native-format: 3/3 passed, 1s cold (then 1/1s cached)
+S2-nested--A-prompt-only: 3/3 passed, 7s cold (then 4/4s cached)
+S2-nested--B-native-format: 3/3 passed, 4s cold (then 4/4s cached)
+S3-enum--A-prompt-only: 3/3 passed, 3s cold (then 1/1s cached)
+S3-enum--B-native-format: 3/3 passed, 2s cold (then 1/3s cached)
+S4-nullable--A-prompt-only: 3/3 passed, 5s cold (then 4/3s cached)
+S4-nullable--B-native-format: 3/3 passed, 3s cold (then 3/3s cached)
+S6-prompt-only-thinking-on: 3/3 passed, 6s cold (then 5/7s cached)
+S5-native-format-thinking-on: 3/3 passed, 7s cold (then 7/6s cached)
+
+summary: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/summary-2026-08-20T15-21-55.json

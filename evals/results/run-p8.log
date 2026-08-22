@@ -1,0 +1,13 @@
+model: qwen3.8:27b-mlx
+probes: 1 x 3 repeats = 3 calls
+raw: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/raw-2026-08-20T14-14-40.jsonl
+
+warm-up: loading the model… 442 ms
+P8-jq-pitfall-named-neutral-hint [1/3] … FAIL (90s, 433p/3973o)
+P8-jq-pitfall-named-neutral-hint [2/3] … FAIL (258s, 433p/7823o)
+P8-jq-pitfall-named-neutral-hint [3/3] … FAIL (192s, 433p/5354o)
+
+--- summary (worst case governs) ---
+P8-jq-pitfall-named-neutral-hint: 0/3 passed, 90-258s
+
+summary: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/summary-2026-08-20T14-14-40.json

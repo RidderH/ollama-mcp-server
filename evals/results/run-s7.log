@@ -1,0 +1,13 @@
+model: qwen3.8:27b-mlx
+probes: 1 x 3 repeats = 3 calls
+raw: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/raw-2026-08-20T15-24-54.jsonl
+
+warm-up: loading the model… 1979 ms
+S7-format-alone-thinking-off [1/3] … FAIL (1s, 334p/40o)
+S7-format-alone-thinking-off [2/3] … FAIL (1s, 334p/40o)
+S7-format-alone-thinking-off [3/3] … FAIL (1s, 334p/40o)
+
+--- summary (worst case governs) ---
+S7-format-alone-thinking-off: 0/3 passed, 1s cold (then 1/1s cached)
+
+summary: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/summary-2026-08-20T15-24-54.json

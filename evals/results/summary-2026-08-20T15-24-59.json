@@ -1,0 +1,34 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T15-24-59",
+  "repeats": 3,
+  "probes": [
+    {
+      "probe": "S8-format-alone-thinking-on",
+      "gap": "structured_output",
+      "question": "With `format` set and the prompt saying nothing about JSON, does the schema still govern the answer?",
+      "decision": "Decides whether `format` could ever replace the \"antwoord uitsluitend met JSON\" instruction, or only reinforce it. If the schema alone does not produce JSON, then adding `format` to the server is a belt on top of a prompt that must stay — and a caller who trusts it instead of the prompt gets prose under a 200.",
+      "n": 3,
+      "passes": 0,
+      "worstCase": "at least one failure",
+      "wallMsMin": 5849,
+      "wallMsMax": 8294,
+      "coldWallMs": 8294,
+      "warmWallMs": [
+        7141,
+        5849
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        622,
+        606,
+        606
+      ],
+      "outputTokens": [
+        40,
+        40,
+        40
+      ]
+    }
+  ]
+}

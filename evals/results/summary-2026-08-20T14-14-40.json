@@ -1,0 +1,29 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T14-14-40",
+  "repeats": 3,
+  "probes": [
+    {
+      "probe": "P8-jq-pitfall-named-neutral-hint",
+      "gap": "planner_pattern",
+      "question": "Vraag: wat is het totale bedrag over alle rijen waarvan de categorie 'inkoop' is, ongeacht hoofdletters of spaties eromheen?",
+      "decision": "The rule file tells Claude to reach for this first whenever a task scales with row count. Every tool that fails here is a tool that advice must stop covering.",
+      "n": 3,
+      "passes": 0,
+      "worstCase": "at least one failure",
+      "wallMsMin": 89509,
+      "wallMsMax": 258096,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        433,
+        433,
+        433
+      ],
+      "outputTokens": [
+        3973,
+        7823,
+        5354
+      ]
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T13-26-42",
+  "repeats": 3,
+  "probes": [
+    {
+      "probe": "P1-awk-csv-total",
+      "gap": "planner_pattern",
+      "question": "Vraag: wat is het totale bedrag over alle rijen waarvan de categorie 'inkoop' is, ongeacht hoofdletters of spaties eromheen?",
+      "decision": "The rule file tells Claude to reach for this first whenever a task scales with row count. Every tool that fails here is a tool that advice must stop covering.",
+      "n": 3,
+      "passes": 1,
+      "worstCase": "at least one failure",
+      "wallMsMin": 71675,
+      "wallMsMax": 155666,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        410,
+        410,
+        410
+      ],
+      "outputTokens": [
+        2810,
+        2189,
+        3254
+      ]
+    },
+    {
+      "probe": "P2-jq-json-total",
+      "gap": "planner_pattern",
+      "question": "Vraag: wat is het totale bedrag over alle rijen waarvan de categorie 'inkoop' is, ongeacht hoofdletters of spaties eromheen?",
+      "decision": "The rule file tells Claude to reach for this first whenever a task scales with row count. Every tool that fails here is a tool that advice must stop covering.",
+      "n": 3,
+      "passes": 0,
+      "worstCase": "at least one failure",
+      "wallMsMin": 104344,
+      "wallMsMax": 142141,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        385,
+        385,
+        385
+      ],
+      "outputTokens": [
+        3962,
+        3798,
+        3131
+      ]
+    },
+    {
+      "probe": "P3-sqlite-total",
+      "gap": "planner_pattern",
+      "question": "Vraag: wat is het totale bedrag over alle rijen waarvan de categorie 'inkoop' is, ongeacht hoofdletters of spaties eromheen?",
+      "decision": "The rule file tells Claude to reach for this first whenever a task scales with row count. Every tool that fails here is a tool that advice must stop covering.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 41145,
+      "wallMsMax": 46194,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        388,
+        388,
+        388
+      ],
+      "outputTokens": [
+        1226,
+        1412,
+        1390
+      ]
+    },
+    {
+      "probe": "P4-python-csv-total",
+      "gap": "planner_pattern",
+      "question": "Vraag: wat is het totale bedrag over alle rijen waarvan de categorie 'inkoop' is, ongeacht hoofdletters of spaties eromheen?",
+      "decision": "The rule file tells Claude to reach for this first whenever a task scales with row count. Every tool that fails here is a tool that advice must stop covering.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 40187,
+      "wallMsMax": 52898,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        412,
+        412,
+        412
+      ],
+      "outputTokens": [
+        1668,
+        1299,
+        1410
+      ]
+    },
+    {
+      "probe": "P6-awk-csv-total-dialect-named",
+      "gap": "planner_pattern",
+      "question": "Vraag: wat is het totale bedrag over alle rijen waarvan de categorie 'inkoop' is, ongeacht hoofdletters of spaties eromheen?",
+      "decision": "The rule file tells Claude to reach for this first whenever a task scales with row count. Every tool that fails here is a tool that advice must stop covering.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 91518,
+      "wallMsMax": 103094,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        456,
+        456,
+        456
+      ],
+      "outputTokens": [
+        2952,
+        3251,
+        3081
+      ]
+    },
+    {
+      "probe": "P5-awk-csv-top3",
+      "gap": "planner_pattern",
+      "question": "Vraag: welke drie categorieën hebben het hoogste totaalbedrag, en wat is dat totaal per categorie? Normaliseer de categorie naar kleine letters zonder omringende spaties.",
+      "decision": "The rule file tells Claude to reach for this first whenever a task scales with row count. Every tool that fails here is a tool that advice must stop covering.",
+      "n": 3,
+      "passes": 1,
+      "worstCase": "at least one failure",
+      "wallMsMin": 99535,
+      "wallMsMax": 104035,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        423,
+        423,
+        423
+      ],
+      "outputTokens": [
+        3293,
+        3092,
+        3119
+      ]
+    }
+  ]
+}

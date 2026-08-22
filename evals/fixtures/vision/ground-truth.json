@@ -1,0 +1,12 @@
+{
+  "_comment": "The invoice as rendered by make-fixtures.mjs, keyed by article code so a row read out of order still grades. Totaal = 1782,00 + 759,80 + 411,00 + 167,40 + 85,00 + 500,00 = 3705,20. D-012 is printed at 85,00 against 1 x 95,00 — a discount no arithmetic predicts, so a model that multiplies instead of reading is caught on that cell and on the total. The btw column is the trap: every row is 21 except C-330, which is 9, so a model reading the wrong column has somewhere visible to go wrong.",
+  "totaalExclBtw": 3705.2,
+  "regels": {
+    "A-100": { "aantal": 4, "stukprijs": 445.5, "btwPercentage": 21, "regeltotaal": 1782 },
+    "A-210": { "aantal": 4, "stukprijs": 189.95, "btwPercentage": 21, "regeltotaal": 759.8 },
+    "B-045": { "aantal": 12, "stukprijs": 34.25, "btwPercentage": 21, "regeltotaal": 411 },
+    "C-330": { "aantal": 6, "stukprijs": 27.9, "btwPercentage": 9, "regeltotaal": 167.4 },
+    "D-012": { "aantal": 1, "stukprijs": 95, "btwPercentage": 21, "regeltotaal": 85 },
+    "E-777": { "aantal": 8, "stukprijs": 62.5, "btwPercentage": 21, "regeltotaal": 500 }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T13-24-58",
+  "repeats": 1,
+  "probes": [
+    {
+      "probe": "P1-awk-csv-total",
+      "gap": "planner_pattern",
+      "question": "Vraag: wat is het totale bedrag over alle rijen waarvan de categorie 'inkoop' is, ongeacht hoofdletters of spaties eromheen?",
+      "decision": "The rule file tells Claude to reach for this first whenever a task scales with row count. Every tool that fails here is a tool that advice must stop covering.",
+      "n": 1,
+      "passes": 0,
+      "worstCase": "at least one failure",
+      "wallMsMin": 56836,
+      "wallMsMax": 56836,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        410
+      ],
+      "outputTokens": [
+        2313
+      ]
+    }
+  ]
+}

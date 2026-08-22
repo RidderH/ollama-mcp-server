@@ -1,0 +1,17 @@
+{
+  "_comment": "Ten Dutch expense lines for gap #6. The four grootboek categories are the vocabulary; 'overig' is the escape. Ground truth was fixed by hand before the model saw the list. 'hard' marks the lines that belong in NO category — a bookkeeper would post them elsewhere — so a forced choice has to be wrong, and the interesting question is whether the model says so.",
+  "categories": ["reiskosten", "kantoorbenodigdheden", "software", "representatie"],
+  "escape": "overig",
+  "items": [
+    { "id": "R1", "omschrijving": "NS Business Card — treinreis Utrecht–Zwolle, 14 augustus", "truth": "reiskosten", "hard": false },
+    { "id": "R2", "omschrijving": "Bol.com — 5 pakken A4-papier en 2 dozen pennen", "truth": "kantoorbenodigdheden", "hard": false },
+    { "id": "R3", "omschrijving": "Adobe Creative Cloud, jaarabonnement", "truth": "software", "hard": false },
+    { "id": "R4", "omschrijving": "Diner met klant De Vries, 2 personen", "truth": "representatie", "hard": false },
+    { "id": "R5", "omschrijving": "Q-Park Amsterdam, parkeren 3 uur", "truth": "reiskosten", "hard": false },
+    { "id": "R6", "omschrijving": "Notariskosten oprichting B.V.", "truth": "overig", "hard": true },
+    { "id": "R7", "omschrijving": "Zonnepanelen op het dak van het bedrijfspand", "truth": "overig", "hard": true },
+    { "id": "R8", "omschrijving": "Cursus Excel voor drie medewerkers", "truth": "overig", "hard": true },
+    { "id": "R9", "omschrijving": "Ziektekostenverzekering directeur", "truth": "overig", "hard": true },
+    { "id": "R10", "omschrijving": "Microsoft 365, licenties voor 10 gebruikers", "truth": "software", "hard": false }
+  ]
+}

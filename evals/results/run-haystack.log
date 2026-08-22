@@ -1,0 +1,25 @@
+model: qwen3.8:27b-mlx
+probes: 4 x 3 repeats = 12 calls
+raw: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/raw-2026-08-20T14-28-47.jsonl
+
+warm-up: loading the model… 353 ms
+H-05k-middle [1/3] … pass (24s, 4933p/70o)
+H-05k-middle [2/3] … pass (1s, 4933p/65o)
+H-05k-middle [3/3] … pass (2s, 4933p/69o)
+H-15k-middle [1/3] … pass (82s, 14906p/140o)
+H-15k-middle [2/3] … pass (3s, 14906p/140o)
+H-15k-middle [3/3] … pass (3s, 14906p/104o)
+H-25k-middle [1/3] … pass (181s, 24961p/160o)
+H-25k-middle [2/3] … pass (6s, 24961p/160o)
+H-25k-middle [3/3] … pass (6s, 24961p/160o)
+H-35k-middle [1/3] … pass (223s, 35078p/157o)
+H-35k-middle [2/3] … pass (7s, 35078p/156o)
+H-35k-middle [3/3] … pass (6s, 35078p/157o)
+
+--- summary (worst case governs) ---
+H-05k-middle: 3/3 passed, 1-24s
+H-15k-middle: 3/3 passed, 3-82s
+H-25k-middle: 3/3 passed, 6-181s
+H-35k-middle: 3/3 passed, 6-223s
+
+summary: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/summary-2026-08-20T14-28-47.json

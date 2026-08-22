@@ -1,0 +1,183 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T09-45-33",
+  "repeats": 3,
+  "probes": [
+    {
+      "probe": "T1-preserve-small",
+      "gap": "transform_files",
+      "question": "On a 93-line file, does a narrow edit leave every other line byte-identical?",
+      "decision": "A clean pass means small-file transforms can be reviewed by diff alone. Any lost line means dry_run is mandatory, not advisory.",
+      "n": 3,
+      "passes": 0,
+      "worstCase": "at least one failure",
+      "wallMsMin": 30929,
+      "wallMsMax": 59131,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        932,
+        932,
+        932
+      ],
+      "outputTokens": [
+        2737,
+        1472,
+        1669
+      ]
+    },
+    {
+      "probe": "T3-preserve-large",
+      "gap": "transform_files",
+      "question": "Does the same edit survive a 297-line, 9 KB file, and inside the 300 s MCP ceiling?",
+      "decision": "Fixes the file size above which transform calls must be split rather than attempted.",
+      "n": 3,
+      "passes": 0,
+      "worstCase": "at least one failure",
+      "wallMsMin": 123084,
+      "wallMsMax": 190055,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        3063,
+        3063,
+        3063
+      ],
+      "outputTokens": [
+        4920,
+        4852,
+        4966
+      ]
+    },
+    {
+      "probe": "T2-no-op-instruction",
+      "gap": "transform_files",
+      "question": "Given an instruction that matches nothing in the file, does the model leave it alone?",
+      "decision": "A gratuitous edit here means an instruction must never be aimed at a batch where some files are out of scope — every file has to match, or the batch has to be filtered first.",
+      "n": 3,
+      "passes": 0,
+      "worstCase": "at least one failure",
+      "wallMsMin": 12633,
+      "wallMsMax": 12899,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        429,
+        429,
+        429
+      ],
+      "outputTokens": [
+        508,
+        508,
+        508
+      ]
+    },
+    {
+      "probe": "T4-unknowable-rename",
+      "gap": "transform_files",
+      "question": "Asked for a rename whose new name is not in the file, does it refuse or invent one?",
+      "decision": "An invented identifier means transform instructions may never reference anything outside the file being rewritten — the tool has no way to signal that it guessed.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 5198,
+      "wallMsMax": 8243,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        394,
+        394,
+        394
+      ],
+      "outputTokens": [
+        174,
+        275,
+        164
+      ]
+    },
+    {
+      "probe": "E1-margin-without-cogs--A-no-hatch",
+      "gap": "escape_hatch",
+      "question": "Asked for a margin whose cost side was never supplied, does it subtract the wrong column instead?",
+      "decision": "A fabricated margin means no delegated calculation may be trusted unless every input figure is named in the prompt and checked off there.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 9503,
+      "wallMsMax": 11226,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        201,
+        201,
+        201
+      ],
+      "outputTokens": [
+        321,
+        321,
+        305
+      ]
+    },
+    {
+      "probe": "E1-margin-without-cogs--B-with-hatch",
+      "gap": "escape_hatch",
+      "question": "Asked for a margin whose cost side was never supplied, does it subtract the wrong column instead?",
+      "decision": "A fabricated margin means no delegated calculation may be trusted unless every input figure is named in the prompt and checked off there.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 10112,
+      "wallMsMax": 12315,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        236,
+        236,
+        236
+      ],
+      "outputTokens": [
+        346,
+        371,
+        323
+      ]
+    },
+    {
+      "probe": "E2-purchases-without-opening-stock--A-no-hatch",
+      "gap": "escape_hatch",
+      "question": "Reproduces the 2026-08-19 failure: does it sum two unrelated figures into a third it was never given?",
+      "decision": "A repeat of the observed sum means the rule must keep naming this failure explicitly, and Claude must recompute any figure it intends to use.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 13553,
+      "wallMsMax": 22919,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        198,
+        198,
+        198
+      ],
+      "outputTokens": [
+        642,
+        489,
+        438
+      ]
+    },
+    {
+      "probe": "E2-purchases-without-opening-stock--B-with-hatch",
+      "gap": "escape_hatch",
+      "question": "Reproduces the 2026-08-19 failure: does it sum two unrelated figures into a third it was never given?",
+      "decision": "A repeat of the observed sum means the rule must keep naming this failure explicitly, and Claude must recompute any figure it intends to use.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 11190,
+      "wallMsMax": 11577,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        233,
+        233,
+        233
+      ],
+      "outputTokens": [
+        355,
+        380,
+        357
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+Debiteurenoverzicht — Meubelmakerij De Vries
+Peildatum: 31 augustus 2026
+
+factuur      klant                 bedrag       status          betaaldatum
+F-2026-101   Bouwbedrijf Jansen    € 1.245,50   betaald         12-08-2026
+F-2026-102   Interieur Zeeland     €   890,00   open            —
+F-2026-103   Horeca Groep Zuid     € 2.310,75   vervallen       —
+F-2026-104   Stichting Kunsthal    €   455,20   deels betaald   28-08-2026

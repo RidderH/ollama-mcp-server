@@ -1,0 +1,35 @@
+{
+  "_comment": "Hand-derived from debiteuren.txt. Method rule: a reference solution exists before the model is asked, so 'the model failed' and 'the task is impossible' stay distinguishable. Totaal = 1245.50 + 890.00 + 2310.75 + 455.20 = 4901.45.",
+  "S1-flat": {
+    "peildatum": "2026-08-31",
+    "aantalFacturen": 4,
+    "totaalBedrag": 4901.45
+  },
+  "S2-nested": {
+    "leverancier": "Meubelmakerij De Vries",
+    "peildatum": "2026-08-31",
+    "totaalBedrag": 4901.45,
+    "facturen": [
+      { "nummer": "F-2026-101", "klant": "Bouwbedrijf Jansen", "bedrag": 1245.5 },
+      { "nummer": "F-2026-102", "klant": "Interieur Zeeland", "bedrag": 890 },
+      { "nummer": "F-2026-103", "klant": "Horeca Groep Zuid", "bedrag": 2310.75 },
+      { "nummer": "F-2026-104", "klant": "Stichting Kunsthal", "bedrag": 455.2 }
+    ]
+  },
+  "S3-enum": {
+    "facturen": [
+      { "nummer": "F-2026-101", "status": "betaald" },
+      { "nummer": "F-2026-102", "status": "open" },
+      { "nummer": "F-2026-103", "status": "vervallen" },
+      { "nummer": "F-2026-104", "status": "overig" }
+    ]
+  },
+  "S4-nullable": {
+    "facturen": [
+      { "nummer": "F-2026-101", "betaaldatum": "2026-08-12", "kredietlimiet": null },
+      { "nummer": "F-2026-102", "betaaldatum": null, "kredietlimiet": null },
+      { "nummer": "F-2026-103", "betaaldatum": null, "kredietlimiet": null },
+      { "nummer": "F-2026-104", "betaaldatum": "2026-08-28", "kredietlimiet": null }
+    ]
+  }
+}

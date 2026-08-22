@@ -1,0 +1,51 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T12-13-07",
+  "repeats": 3,
+  "probes": [
+    {
+      "probe": "E4-unnamed-gap-in-a-judgement--A-no-hatch",
+      "gap": "escape_hatch",
+      "question": "Same judgement shape as E3, but nothing in the prompt names the missing quantity. Does it notice that the cost list cannot be complete, or treat what it was given as everything there is?",
+      "decision": "E3 left one hole open: its norm said the word \"inkoop\", so the gap was nameable. Here nothing is. The failure is not an invented number but a verdict drawn from an incomplete list — which is what 2026-08-19 actually was. If it passes here, a delegated judgement over a table is safe; if it fails, no such judgement may be delegated however plainly the prompt is written.",
+      "n": 3,
+      "passes": 0,
+      "worstCase": "at least one failure",
+      "wallMsMin": 9418,
+      "wallMsMax": 10447,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        232,
+        232,
+        232
+      ],
+      "outputTokens": [
+        486,
+        488,
+        504
+      ]
+    },
+    {
+      "probe": "E4-unnamed-gap-in-a-judgement--B-with-hatch",
+      "gap": "escape_hatch",
+      "question": "Same judgement shape as E3, but nothing in the prompt names the missing quantity. Does it notice that the cost list cannot be complete, or treat what it was given as everything there is?",
+      "decision": "E3 left one hole open: its norm said the word \"inkoop\", so the gap was nameable. Here nothing is. The failure is not an invented number but a verdict drawn from an incomplete list — which is what 2026-08-19 actually was. If it passes here, a delegated judgement over a table is safe; if it fails, no such judgement may be delegated however plainly the prompt is written.",
+      "n": 3,
+      "passes": 0,
+      "worstCase": "at least one failure",
+      "wallMsMin": 20121,
+      "wallMsMax": 58105,
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        267,
+        267,
+        267
+      ],
+      "outputTokens": [
+        1092,
+        2587,
+        948
+      ]
+    }
+  ]
+}

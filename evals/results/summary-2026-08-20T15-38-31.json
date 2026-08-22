@@ -1,0 +1,151 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T15-38-31",
+  "repeats": 6,
+  "probes": [
+    {
+      "probe": "C1-closed-list",
+      "gap": "classification",
+      "question": "Four of the ten rows belong in none of the four categories offered. Does the model say so, or does it quietly post them somewhere?",
+      "decision": "This is the configuration the rule file has been recommending by omission — \"classify against a fixed list\", with no word about what the list must contain. If the model forces the four silently, the recommendation is unsafe as written and the rule has to name the escape category.",
+      "n": 6,
+      "passes": 0,
+      "worstCase": "at least one failure",
+      "wallMsMin": 2638,
+      "wallMsMax": 8793,
+      "coldWallMs": 2976,
+      "warmWallMs": [
+        4115,
+        2638,
+        4459,
+        6919,
+        8793
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        539,
+        539,
+        539,
+        539,
+        539,
+        539
+      ],
+      "outputTokens": [
+        76,
+        267,
+        131,
+        70,
+        263,
+        383
+      ]
+    },
+    {
+      "probe": "C2-escape-offered",
+      "gap": "classification",
+      "question": "With \"overig\" among the choices, does it reach for it on exactly the rows that need it?",
+      "decision": "Decides whether an escape category is enough on its own. Over-use is as bad as under-use: a model that posts half the easy rows to \"overig\" has made the output useless in the other direction.",
+      "n": 6,
+      "passes": 6,
+      "worstCase": "all passed",
+      "wallMsMin": 2377,
+      "wallMsMax": 7232,
+      "coldWallMs": 2377,
+      "warmWallMs": [
+        4760,
+        2639,
+        4896,
+        6665,
+        7232
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        562,
+        562,
+        562,
+        562,
+        562,
+        562
+      ],
+      "outputTokens": [
+        111,
+        259,
+        111,
+        111,
+        259,
+        259
+      ]
+    },
+    {
+      "probe": "C3-closed-with-doubt",
+      "gap": "classification",
+      "question": "The list is still closed, but now there is a `zekerheid` field. Does the doubt land on the four rows that were forced?",
+      "decision": "Gap #5 found that a nullable field gives absence somewhere to go. This asks whether a confidence field does the same for a bad fit. If it does, a closed list stays delegable as long as the caller reads the flag; if it does not, only the escape category works.",
+      "n": 6,
+      "passes": 6,
+      "worstCase": "all passed",
+      "wallMsMin": 8514,
+      "wallMsMax": 10947,
+      "coldWallMs": 8514,
+      "warmWallMs": [
+        8824,
+        8703,
+        9990,
+        9144,
+        10947
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        626,
+        626,
+        626,
+        626,
+        626,
+        626
+      ],
+      "outputTokens": [
+        368,
+        369,
+        373,
+        373,
+        369,
+        367
+      ]
+    },
+    {
+      "probe": "C4-escape-and-doubt",
+      "gap": "classification",
+      "question": "Both levers at once — does the confidence field still discriminate when nothing needs forcing?",
+      "decision": "Guards against the cheerful failure mode: a `zekerheid` field that reads \"hoog\" on all ten rows teaches a caller to trust it, and would then be trusted on the run where it matters.",
+      "n": 6,
+      "passes": 6,
+      "worstCase": "all passed",
+      "wallMsMin": 10884,
+      "wallMsMax": 21495,
+      "coldWallMs": 10884,
+      "warmWallMs": [
+        12236,
+        14573,
+        11343,
+        19771,
+        21495
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        649,
+        649,
+        649,
+        649,
+        649,
+        649
+      ],
+      "outputTokens": [
+        360,
+        360,
+        360,
+        172,
+        360,
+        360
+      ]
+    }
+  ]
+}

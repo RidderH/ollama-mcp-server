@@ -1,0 +1,34 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T17-42-19",
+  "repeats": 3,
+  "probes": [
+    {
+      "probe": "M-35k-five-facts",
+      "gap": "multi_fact_synthesis",
+      "question": "At roughly 35k prompt tokens, are five facts spread through the prompt still retrievable, and can they be combined?",
+      "decision": "Fixes whether the ~40k read ceiling holds for a question with more than one answer in it, or whether a long delegated read must be restricted to a single lookup. Separates the two reasons it could fail: figures not found, or found figures added up wrong.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 37195,
+      "wallMsMax": 267517,
+      "coldWallMs": 37195,
+      "warmWallMs": [
+        267517,
+        52816
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        36978,
+        36978,
+        36978
+      ],
+      "outputTokens": [
+        366,
+        419,
+        427
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+model: qwen3.8:27b-mlx
+probes: 4 x 6 repeats = 24 calls
+raw: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/raw-2026-08-20T15-38-31.jsonl
+
+warm-up: loading the model… 2730 ms
+C1-closed-list [1/6] … FAIL (3s, 539p/76o)
+C1-closed-list [2/6] … FAIL (4s, 539p/267o)
+C1-closed-list [3/6] … FAIL (3s, 539p/131o)
+C1-closed-list [4/6] … FAIL (4s, 539p/70o)
+C1-closed-list [5/6] … FAIL (7s, 539p/263o)
+C1-closed-list [6/6] … FAIL (9s, 539p/383o)
+C2-escape-offered [1/6] … pass (2s, 562p/111o)
+C2-escape-offered [2/6] … pass (5s, 562p/259o)
+C2-escape-offered [3/6] … pass (3s, 562p/111o)
+C2-escape-offered [4/6] … pass (5s, 562p/111o)
+C2-escape-offered [5/6] … pass (7s, 562p/259o)
+C2-escape-offered [6/6] … pass (7s, 562p/259o)
+C3-closed-with-doubt [1/6] … pass (9s, 626p/368o)
+C3-closed-with-doubt [2/6] … pass (9s, 626p/369o)
+C3-closed-with-doubt [3/6] … pass (9s, 626p/373o)
+C3-closed-with-doubt [4/6] … pass (10s, 626p/373o)
+C3-closed-with-doubt [5/6] … pass (9s, 626p/369o)
+C3-closed-with-doubt [6/6] … pass (11s, 626p/367o)
+C4-escape-and-doubt [1/6] … pass (11s, 649p/360o)
+C4-escape-and-doubt [2/6] … pass (12s, 649p/360o)
+C4-escape-and-doubt [3/6] … pass (15s, 649p/360o)
+C4-escape-and-doubt [4/6] … pass (11s, 649p/172o)
+C4-escape-and-doubt [5/6] … pass (20s, 649p/360o)
+C4-escape-and-doubt [6/6] … pass (21s, 649p/360o)
+
+--- summary (worst case governs) ---
+C1-closed-list: 0/6 passed, 3s cold (then 4/3/4/7/9s cached)
+C2-escape-offered: 6/6 passed, 2s cold (then 5/3/5/7/7s cached)
+C3-closed-with-doubt: 6/6 passed, 9s cold (then 9/9/10/9/11s cached)
+C4-escape-and-doubt: 6/6 passed, 11s cold (then 12/15/11/20/21s cached)
+
+summary: /Users/ridderhaspels/Code_projects/MCP_Server/ollama-mcp-server/evals/results/summary-2026-08-20T15-38-31.json
