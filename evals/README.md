@@ -13,7 +13,7 @@ does not belong here.
 
 ```bash
 npm run test:evals            # the graders and the anti-drift guards — fast, no GPU
-npm run evals                 # 47 probes, 3 repeats, ~90 min (summed from recorded wall times)
+npm run evals                 # 51 probes, 3 repeats, ~2 h (summed from recorded wall times)
 node evals/run.mjs --only T1  # one probe
 node evals/run.mjs --repeats 1
 ```
@@ -65,6 +65,8 @@ temperature and disable_thinking), so repeats are the only control over variance
 | `T4-unknowable-rename` | transform_files | whether an instruction may reference anything outside the file |
 | `E1-margin-without-cogs` | escape hatch | whether a delegated calculation can be trusted at all |
 | `E2-purchases-without-opening-stock` | escape hatch | whether the observed sum-fabrication reproduces |
+| `H-05k`–`H-35k` | prompt budget | the prompt size at which one fact stops being retrievable |
+| `M-05k`–`M-35k` | multi-fact synthesis | whether that ceiling survives a question with five answers in it |
 | `S1-flat` | structured output | whether a delegated result can be piped into a program at all |
 | `S2-nested` | structured output | whether a caller must count the rows of an extracted table itself |
 | `S3-enum` | structured output | whether a classification can be consumed by a switch statement |
@@ -84,6 +86,15 @@ the tools can do today, and **B** with the same prompt plus Ollama's own `format
 measured because "add `format` to the server" is a decision the result can settle. A and B send
 identical prompt bytes, so B lands on the prompt cache: the pair is valid for correctness and
 **invalid for latency**.
+
+The `M` probes mirror the `H` ladder rung for rung — same sizes, same corpus shape, same
+thinking-on default — so the pair isolates one variable: the number of facts the question
+asks for. `H` plants one and asks for one; `M` plants five, spreads them from the first
+branch to the last, and asks for all five plus their total. The answer is JSON so the two
+ways it can be wrong stay apart: `recall` counts figures retrieved, and
+`arithmeticConsistent` says whether the total is the sum of what the model itself reported.
+Five right figures and a wrong total is arithmetic; a wrong total over four right figures and
+one misread is retrieval. They are different problems with different fixes.
 
 The `E` probes run twice each: **A** without the Dutch escape-hatch sentence, **B** with it.
 The shipped `DELEGATE_SYSTEM_PROMPT` already carries an `INSUFFICIENT:` escape hatch of its

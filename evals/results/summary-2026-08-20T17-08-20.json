@@ -1,0 +1,115 @@
+{
+  "model": "qwen3.8:27b-mlx",
+  "startedAt": "2026-08-20T17-08-20",
+  "repeats": 3,
+  "probes": [
+    {
+      "probe": "M-05k-five-facts",
+      "gap": "multi_fact_synthesis",
+      "question": "At roughly 05k prompt tokens, are five facts spread through the prompt still retrievable, and can they be combined?",
+      "decision": "Fixes whether the ~40k read ceiling holds for a question with more than one answer in it, or whether a long delegated read must be restricted to a single lookup. Separates the two reasons it could fail: figures not found, or found figures added up wrong.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 47959,
+      "wallMsMax": 50100,
+      "coldWallMs": 47959,
+      "warmWallMs": [
+        50100,
+        49279
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        5430,
+        5430,
+        5430
+      ],
+      "outputTokens": [
+        342,
+        316,
+        316
+      ]
+    },
+    {
+      "probe": "M-15k-five-facts",
+      "gap": "multi_fact_synthesis",
+      "question": "At roughly 15k prompt tokens, are five facts spread through the prompt still retrievable, and can they be combined?",
+      "decision": "Fixes whether the ~40k read ceiling holds for a question with more than one answer in it, or whether a long delegated read must be restricted to a single lookup. Separates the two reasons it could fail: figures not found, or found figures added up wrong.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 105062,
+      "wallMsMax": 140585,
+      "coldWallMs": 140585,
+      "warmWallMs": [
+        114808,
+        105062
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        15855,
+        15855,
+        15855
+      ],
+      "outputTokens": [
+        302,
+        302,
+        299
+      ]
+    },
+    {
+      "probe": "M-25k-five-facts",
+      "gap": "multi_fact_synthesis",
+      "question": "At roughly 25k prompt tokens, are five facts spread through the prompt still retrievable, and can they be combined?",
+      "decision": "Fixes whether the ~40k read ceiling holds for a question with more than one answer in it, or whether a long delegated read must be restricted to a single lookup. Separates the two reasons it could fail: figures not found, or found figures added up wrong.",
+      "n": 3,
+      "passes": 3,
+      "worstCase": "all passed",
+      "wallMsMin": 187185,
+      "wallMsMax": 202926,
+      "coldWallMs": 190525,
+      "warmWallMs": [
+        202926,
+        187185
+      ],
+      "exceededMcpCeiling": 0,
+      "promptTokens": [
+        26421,
+        26421,
+        26421
+      ],
+      "outputTokens": [
+        365,
+        429,
+        430
+      ]
+    },
+    {
+      "probe": "M-35k-five-facts",
+      "gap": "multi_fact_synthesis",
+      "question": "At roughly 35k prompt tokens, are five facts spread through the prompt still retrievable, and can they be combined?",
+      "decision": "Fixes whether the ~40k read ceiling holds for a question with more than one answer in it, or whether a long delegated read must be restricted to a single lookup. Separates the two reasons it could fail: figures not found, or found figures added up wrong.",
+      "n": 3,
+      "passes": 2,
+      "worstCase": "at least one failure",
+      "wallMsMin": 282912,
+      "wallMsMax": 300971,
+      "coldWallMs": 282912,
+      "warmWallMs": [
+        300971,
+        295715
+      ],
+      "exceededMcpCeiling": 1,
+      "promptTokens": [
+        36978,
+        null,
+        36978
+      ],
+      "outputTokens": [
+        365,
+        null,
+        427
+      ]
+    }
+  ]
+}

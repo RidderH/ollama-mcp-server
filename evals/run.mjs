@@ -19,6 +19,7 @@ import { TRANSFORM_PROBES } from './probes/transform.mjs';
 import { ESCAPE_HATCH_PROBES } from './probes/escape-hatch.mjs';
 import { PLANNER_PROBES } from './probes/planner.mjs';
 import { HAYSTACK_PROBES } from './probes/haystack.mjs';
+import { MULTIFACT_PROBES } from './probes/multifact.mjs';
 import { STRUCTURED_PROBES } from './probes/structured.mjs';
 import { CLASSIFY_PROBES } from './probes/classify.mjs';
 import { DUTCH_PROBES } from './probes/dutch.mjs';
@@ -29,6 +30,7 @@ const ALL_PROBES = [
   ...ESCAPE_HATCH_PROBES,
   ...PLANNER_PROBES,
   ...HAYSTACK_PROBES,
+  ...MULTIFACT_PROBES,
   ...STRUCTURED_PROBES,
   ...CLASSIFY_PROBES,
   ...DUTCH_PROBES,
@@ -86,12 +88,18 @@ function summarise(runs) {
       worstCase: passes === bucket.length ? 'all passed' : 'at least one failure',
       wallMsMin: Math.min(...wall),
       wallMsMax: Math.max(...wall),
-      // Repeats send identical bytes, which hit Ollama's prompt cache: at 25k
+      // A repeat that sends identical bytes hits Ollama's prompt cache: at 25k
       // tokens the same prompt returned in 8 s against 154 s for one differing
-      // only in where the needle sits. Only the first call in a group measures
-      // a cold read, so it is reported apart rather than averaged in, which
-      // would understate a fresh call by an order of magnitude. Repeats stay
-      // meaningful for correctness -- generation is still sampled afresh.
+      // only in where the needle sits. For those probes only the first call in
+      // a group measures a cold read, so it is reported apart rather than
+      // averaged in, which would understate a fresh call by an order of
+      // magnitude; the repeats stay meaningful for correctness, because
+      // generation is still sampled afresh.
+      //
+      // A probe that varies its prompt with the repeat number -- the classify
+      // and multi-fact ladders do -- gets no such discount, and every one of
+      // its calls is a cold read. Which of the two happened is not assumed
+      // below: it is read off the wall times.
       coldWallMs: bucket[0].wallMs,
       warmWallMs: bucket.slice(1).map((run) => run.wallMs),
       exceededMcpCeiling: bucket.filter((run) => run.exceedsMcpCeiling).length,
@@ -197,8 +205,9 @@ async function main() {
       `${probe.probe}: ${probe.passes}/${probe.n} passed, ` +
         `${Math.round(probe.coldWallMs / 1000)}s cold` +
         (probe.warmWallMs.length > 0
-          ? ` (then ${probe.warmWallMs.map((ms) => Math.round(ms / 1000)).join('/')}s cached)`
-          : '') +`` +
+          ? ` (then ${probe.warmWallMs.map((ms) => Math.round(ms / 1000)).join('/')}s` +
+            `${Math.max(...probe.warmWallMs) < probe.coldWallMs / 4 ? ', prompt-cached' : ', also cold'})`
+          : '') +
         (probe.exceededMcpCeiling > 0 ? `, ${probe.exceededMcpCeiling} over the MCP ceiling` : '')
     );
   }

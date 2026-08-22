@@ -726,3 +726,94 @@ true baseline with uniform stroke weight, so a model passing it would say nothin
 hand — and the result would read like coverage. It is left open rather than answered by a
 proxy that flatters the model. Measuring it needs photographs of actual handwriting with
 hand-checked ground truth, which is fixture work rather than harness work.
+
+---
+
+# Findings — runs 2026-08-20T17:08:20 and 17:42:19 (gap #9, multi-fact synthesis)
+
+`qwen3.8:27b-mlx`, the `M` ladder: five figures spread from the first branch of the corpus to
+the last, a question asking for all five plus their total, at 05k / 15k / 25k / 35k prompt
+tokens. Thinking on, `num_ctx` 32768 — the shipped defaults, and the same rungs as the
+single-fact `H` ladder, so the pair differs in the number of facts and nothing else.
+
+Raw: `raw-2026-08-20T17-08-20.jsonl` (12 calls) and `raw-2026-08-20T17-42-19.jsonl` (3 more at
+the top rung, to replace the one the wall took). Every repeat rotates which needle sits in
+which slot, so each call is a fresh prompt rather than a cache replay.
+
+| probe | prompt tokens | n | passed | wall (uncached) | verdict |
+|---|---|---|---|---|---|
+| M-05k | 5.430 | 3 | 3 | 48 / 50 / 49 s | every figure, every total |
+| M-15k | 15.855 | 3 | 3 | 141 / 115 / 105 s | every figure, every total |
+| M-25k | 26.421 | 3 | 3 | 191 / 203 / 187 s | every figure, every total |
+| M-35k | 36.978 | 4 | 3 | 283 / **301†** / 296 / 268 s | † died on Ollama's 300 s wall |
+
+## 37. Five facts are as retrievable as one, at every size measured
+
+**55 of 55 figures correct. 11 of 11 totals exact. No misread, no dropped city, no invented
+one, at any rung.** Not one answer needed the `missing`, `misread` or `extra` field the grader
+carries, and the total — a five-number sum the model had to compute itself — came back exactly
+`20161` in every single call, including the three cache-replayed ones (14/14 in all).
+
+So the open sentence in the rule file — *"measured on single-fact retrieval only; multi-fact
+synthesis across a long prompt is untested and may well degrade earlier"* — is answered, and
+answered in the direction the caution did not expect. Recall of five spread facts at 37k
+prompt tokens is indistinguishable from recall of one at 35k.
+
+The grader was built to tell two failures apart and never got to: `arithmeticConsistent` was
+true in all 14, and it was true *alongside* a correct total rather than instead of one. What
+that rules out is worth stating, because it is the failure mode gap #2 would have predicted —
+the model did not quietly drop a branch it could not find and sum the four it had. A dropped
+row would have left `recall` at 4 with the arithmetic still self-consistent, which is exactly
+the shape finding 21 warns about in an extracted table. It did not happen once.
+
+## 38. What binds at 35k is the clock, and at that size the clock is *reading*
+
+One call of the four uncached ones at the top rung never returned: `TypeError: fetch failed`
+after 301 s. That is not the model and not the harness timeout, which sits at 900 s. The
+server log names it exactly:
+
+```
+[GIN] 2026/08/20 - 19:36:13 | 500 |          5m0s |       127.0.0.1 | POST "/api/chat"
+time=... level=INFO source=runner.go:232 msg="Request terminated" error="context canceled"
+```
+
+Ollama's own 300 s request wall, and the top rung sits right against it: 283 s, 296 s, 268 s,
+and one death at 300 s. Three of four made it, which makes a 35k multi-fact delegation a coin
+weighted toward success rather than a reliable call — and the failure costs the full five
+minutes before it tells you anything.
+
+**Where the time goes reverses finding 19's emphasis at this size.** The answer is 226
+characters; generation is 365–427 tokens including the thinking phase, about 11–13 s at the
+measured 32 tok/s. The other **≈272 s of that 283 s call is prompt processing** — roughly
+131–136 tok/s across the two completed runs, in line with the 138–210 tok/s read rate. Finding 19 said "a token you ask it
+to write costs four to five times a token you ask it to read", and that stands per token; but
+at 37k prompt against a 60-token answer, the prompt is 98 % of the wall. **So
+`disable_thinking` buys nothing worth having at the top rung** — there is no generation to cut.
+Shortening the prompt is the only lever, which is the opposite of the advice that fits a long
+answer.
+
+## 39. This is the first ladder in the harness with three cold reads per rung — and it reprices the old one
+
+The `H` repeats sent identical bytes: 24 s cold then **1 s and 2 s** at 05k, 223 s cold then
+**7 s and 6 s** at 35k. Those replays still sampled generation afresh, so H's "12/12" recall
+is 12 real answers — but over **four distinct prompts**, not twelve. The `M` ladder rotates the
+needle placement per repeat, so its 48/50/49 s and 191/203/187 s are three independent cold
+reads, and its 12/12 is twelve distinct prompts.
+
+That also gives the first honest read-rate spread at each size, since every call paid for its
+own prompt. It is finding 20's methodological correction applied at the source rather than
+noted after the fact, and the runner now says which of the two happened — it compares each
+repeat against its own cold call instead of assuming the cache was hit.
+
+## 40. What this changes
+
+- **A long delegated read may ask for more than one fact.** The ~40k read ceiling was measured
+  on single-fact retrieval; it survives five facts spread across the window, with an exact sum
+  on top. No need to split a five-figure question into five calls.
+- **The ceiling is time, not recall.** Size the call against the 300 s wall, not against what
+  the model can find. ~25k prompt tokens completes in 187–203 s with room to spare; ~35k runs
+  268–296 s and loses roughly one call in four to the wall.
+- **At the top rung, cut the prompt, not the thinking.** Reading is 98 % of the wall there, so
+  `disable_thinking` is not the lever it is for a long answer.
+- **The JSON came back clean 14/14 — raw parse, no fences.** Finding 22 holds for text tasks at
+  every prompt size measured; finding 35's one-in-three fencing stays a vision-only effect.
